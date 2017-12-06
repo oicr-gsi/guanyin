@@ -1,0 +1,23 @@
+{
+  "name": "reportDB",
+  "version": "1.0.0",
+  "description": "Report DB",
+  "main": "app.js",
+  "scripts": {
+    "start": "node ./startServe",
+    "fw-clean": "flyway -X -configFile=conf/flyway.conf clean",
+    "fw-migrate": "flyway -X -configFile=conf/flyway.conf -locations=filesystem:./sql/ migrate"
+  },
+  "repository": {
+    "type": "git"
+  },
+  "author": "Xuemei Luo",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^4.0.0",
+    "express": "^4.16.2",
+    "flywaydb-cli": "^0.5.0",
+    "pg-promise": "^7.3.2"
+  },
+  "devDependencies": {}
+}
