@@ -1,23 +1,32 @@
 {
-  "name": "reportDB",
-  "version": "1.0.0",
-  "description": "Report DB",
-  "main": "app.js",
+  "name": "guangyin",
+  "version": "0.0.0",
+  "private": true,
   "scripts": {
-    "start": "node ./startServe",
+    "start": "node ./bin/www",
+    "start:dev": "nodemon ./bin/www",
     "fw-clean": "flyway -X -configFile=conf/flyway.conf clean",
     "fw-migrate": "flyway -X -configFile=conf/flyway.conf -locations=filesystem:./sql/ migrate"
   },
   "repository": {
     "type": "git"
-  },
+  },  
   "author": "Xuemei Luo",
   "license": "MIT",
   "dependencies": {
+    "bluebird": "^3.5.1",
+    "body-parser": "~1.18.2",
+    "cookie-parser": "~1.4.3",
+    "debug": "~2.6.9",
     "dotenv": "^4.0.0",
-    "express": "^4.16.2",
+    "express": "~4.15.5",
     "flywaydb-cli": "^0.5.0",
-    "pg-promise": "^7.3.2"
+    "jade": "~1.11.0",
+    "morgan": "~1.9.0",
+    "pg-promise": "^7.3.2",
+    "serve-favicon": "~2.4.5"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "nodemon": "^1.12.6"
+  }
 }
