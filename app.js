@@ -28,8 +28,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', index);
 app.use('/users', users);
 
-// development error handler
-// will print stacktrace
+// catch 404 and forward to error handler
+app.use(function(req, res, next) {
+  var err = new Error('Not Found');
+  err.status = 404;
+  next(err);
+});
+
+
 if (app.get('env') === 'development') {
   app.use(function(err, req, res, next) {
     res.status( err.code || 500 )
