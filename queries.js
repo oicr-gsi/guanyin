@@ -14,11 +14,7 @@ function getAllReports(req, res, next) {
   db.any('select * from report')
     .then(function (data) {
       res.status(200)
-        .json({
-          status: 'success',
-          data: data,
-          message: 'Retrieved ALL reports'
-        });
+        .json(data);
     })
     .catch(function (err) {
       return next(err);
@@ -30,16 +26,25 @@ function getSingleReport(req, res, next) {
   db.one('select * from report where report_id = $1', reportID)
     .then(function (data) {
       res.status(200)
-        .json({
-          status: 'success',
-          data: data,
-          message: 'Retrieved ONE report'
-        });
+        .json(data);
     })
     .catch(function (err) {
       return next(err);
     });
 }
+
+function getAllreports_by_name (req, res, next) {
+  var name = req.query.name;
+  db.any('select * from report where name = $1', name)
+    .then(function (data) {
+      res.status(200)
+        .json(data);
+    })
+    .catch(function (err) {
+      return next(err);
+    });
+}
+
 
 function createReport(req, res, next) {
   db.none('insert into report(name, version, category, permitted_parameters)' +
@@ -77,11 +82,7 @@ function getAllReportrecords(req, res, next) {
   db.any('select * from report_record')
     .then(function (data) {
       res.status(200)
-        .json({
-          status: 'success',
-          data: data,
-          message: 'Retrieved ALL report records'
-        });
+        .json(data);
     })
     .catch(function (err) {
       return next(err);
@@ -94,28 +95,19 @@ function getAllreportrecords_by_notification_done (req, res, next) {
   db.any('select * from report_record where notification_done = $1', done)
     .then(function (data) {
       res.status(200)
-        .json({
-          status: 'success',
-          data: data,
-          message: 'Retrieved report records'
-        });
+        .json(data);
     })
     .catch(function (err) {
       return next(err);
     });
 }
 
-
 function getSingleReportrecord(req, res, next) {
   var report_record_ID = parseInt(req.params.id);
   db.one('select * from report_record where report_record_id = $1', report_record_ID)
     .then(function (data) {
       res.status(200)
-        .json({
-          status: 'success',
-          data: data,
-          message: 'Retrieved ONE report record'
-        });
+        .json(data);
     })
     .catch(function (err) {
       return next(err);
@@ -177,11 +169,7 @@ function findReportrecord_files_in (req, res, next) {
    [req.query.name, req.query.version, req.body.files_in])
     .then(function (data) {
       res.status(200)
-        .json({
-          status: 'success',
-          data: data,
-          message: 'Retrieved report records'
-        });
+        .json(data);
     })
     .catch(function (err) {
       return next(err);
@@ -194,11 +182,7 @@ function findReportrecord_parameters (req, res, next) {
    [req.query.name, req.query.version, req.body.parameters])
     .then(function (data) {
       res.status(200)
-        .json({
-          status: 'success',
-          data: data,
-          message: 'Retrieved report records'
-        });
+        .json(data);
     })
     .catch(function (err) {
       return next(err);
@@ -209,6 +193,7 @@ function findReportrecord_parameters (req, res, next) {
 module.exports = {
   getAllReports: getAllReports,
   getSingleReport: getSingleReport,
+  getAllreports_by_name:getAllreports_by_name,
   createReport: createReport,
   updateReport: updateReport,
   getAllReportrecords: getAllReportrecords,
