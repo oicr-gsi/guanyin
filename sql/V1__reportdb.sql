@@ -25,9 +25,3 @@ CREATE TABLE report_record (
         PRIMARY KEY (report_record_id)
 );
 
-Insert INTO report (name, version, category, permitted_parameters)
-VALUES ('jsonReport', '1.0', 'report', '{"runName":"2017", "instrument":"HiSeq"}');
-
-Insert INTO report_record (report_id, files_in, report_path, notification_targets, notification_message, parameters)
-VALUES (1, '{"file_id":"a1", "file_path":"p1"}','/oicr/data/archive','{"email":"xluo@oicr.on.ca"}', 'here is the run report', '{"runName":"2017", "instrument":"HiSeq"}');
-
