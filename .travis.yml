@@ -2,10 +2,15 @@ language: node_js
 node_js:
   - "node"
 services:
-- postgresql
+  - postgresql
+
 addons:
   postgresql: '10.1'
-    
+
+env:
+  global:
+    - NODE_ENV=TEST    
+
 before_install:
   - psql -c "create user reporter with password 'test' createdb;" -U postgres
   - psql -c "ALTER USER reporter WITH superuser;" -U postgres
