@@ -1,0 +1,20 @@
+language: node_js
+node_js:
+  - "node"
+services:
+- postgresql
+addons:
+  postgresql: '10.1'
+    
+before_install:
+  - psql -c "create user reporter with password 'test' createdb;" -U postgres
+  - psql -c "ALTER USER reporter WITH superuser;" -U postgres
+  - psql -c 'create database test_report_db with owner = reporter;' -U postgres
+  - npm run fw:test-migrate
+
+script:
+    - npm run test
+
+cache:
+  directories:
+    - "node_modules" 
