@@ -9,7 +9,7 @@ addons:
 
 env:
   global:
-    - NODE_ENV=TEST    
+  - NODE_ENV=test    
 
 before_install:
   - psql -c "create user reporter with password 'test' createdb;" -U postgres
