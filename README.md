@@ -75,4 +75,6 @@ After that initial setup, run migrations as necessary using:
 
 	$ npm start
 
+## Running the test
 
+       $ npm run test
