@@ -8,14 +8,11 @@ services:
   - postgresql
 
 addons:
-  postgresql: '10.1'
+  postgresql: '9.5'
 
 env:
   global:
   - NODE_ENV=test    
-
-before_install:
-  - export PATH=~/bin:$PATH
 
 before_script:
   - psql -c "create user reporter with password 'test' createdb;" -U postgres
