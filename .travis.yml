@@ -14,6 +14,9 @@ env:
   global:
   - NODE_ENV=test    
 
+before_install:
+  - export PATH=~/bin:$PATH
+
 before_script:
   - psql -c "create user reporter with password 'test' createdb;" -U postgres
   - psql -c "ALTER USER reporter WITH superuser;" -U postgres
