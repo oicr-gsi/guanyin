@@ -41,7 +41,7 @@ Insert INTO report (name, version, category, permitted_parameters)
 VALUES ('coveragereport', '1.0', 'report', '{"type":"object", "required":"true", "properties":{"project":{"type":"string", "required":"true"}, "instrument":{"type":"string", "required":"false"}}}');
 
 Insert INTO report_record (report_id, files_in, report_path, notification_targets, notification_message, parameters)
-VALUES (3, '{"file_path":["p1", "p2", "p3"]}','/oicr/data/archive/r3','{"email":"xluo@oicr.on.ca"}', 'here is the coverage report for PCSI', '{"project ":"PCSI", "instrument":"HiSeq"}');
+VALUES (3, '{"file_path":["p1", "p2", "p3"]}','/oicr/data/archive/r3','{"email":"xluo@oicr.on.ca"}', 'here is the coverage report for PCSI', '{"project":"PCSI", "instrument":"HiSeq"}');
 
 Insert INTO report (name, version, category, permitted_parameters)
 VALUES ('coveragereport', '1.1', 'report', '{"type":"object", "required":"true", "properties":{"project":{"type":"string", "required":"true"}, "instrument":{"type":"string", "required":"false"}}}');
