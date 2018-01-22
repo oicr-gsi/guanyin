@@ -11,7 +11,7 @@ var db = require('../queries');
  *       report_id:
  *         type: integer
  *         description: The report ID
- *         readyOnly: true
+ *         readOnly: true
  *       name:
  *         type: string
  *         description: The name of the report
