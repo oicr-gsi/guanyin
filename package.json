@@ -5,6 +5,7 @@
   "scripts": {
     "start": "node ./bin/www",
     "start:dev": "nodemon ./bin/www",
+    "start:prod": "NODE_ENV=production nodejs --abort-on-uncaught-exception ./bin/www",
     "fw:clean": "flyway -X -configFile=conf/flyway.conf clean",
     "fw:migrate": "flyway -X -configFile=conf/flyway.conf -locations=filesystem:./sql/ migrate",
     "fw:test-clean": "flyway -X -configFile=conf/flyway-test.conf clean",
