@@ -22,7 +22,6 @@ var swaggerDefinition = {
     version: '1.0.0',
     description: 'API for the ReportDB project',
   },
-  host: 'localhost:3000',
   basePath: '/',
 };
 
