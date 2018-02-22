@@ -11,7 +11,7 @@ One Who] Perceives the Sounds of the World". (from https://en.wikipedia.org/wiki
 
 Checking for node:
 
-	node -v
+    node -v
 
 
 ## Installing modules
@@ -51,7 +51,7 @@ When setting up the database for the first time:
         
 After that initial setup, run migrations as necessary using:
 
-		$ npm run fw:migrate
+	$ npm run fw:migrate
 
 ## Running the application
 
