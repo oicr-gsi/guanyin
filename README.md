@@ -3,31 +3,20 @@ One Who] Perceives the Sounds of the World". (from https://en.wikipedia.org/wiki
 
 # Getting started
 
-## Tools and technologies
+## Requirements
 
-    Node 8.9.1
-    express-generator 4.15.5
-    pg-promise 7.3.2
-    PostgreSQL 10.1
-    flywaydb-cli 0.5.0
+    Node v4.x or higher  (developed on 8.9.1)
+    NPM (comes with Node)
+    PostgreSQL 9.5 or higher (developed on 10.1)
 
 Checking for node:
 
 	node -v
 
 
-## Project setup
-
-    $ npm install express-generator
-
-    $ ./node_modules/express-generator/bin/express-cli.js guanyin
+## Installing modules
 
     $ npm install
-
-    $ npm install pg-promise --save
-
-    $ npm install bluebird --save
-
 
 ## Postgres setup
 
@@ -35,9 +24,8 @@ Checking for node:
 
 Create a .env file and populate it. The .env-example file provides a template for this.
 
-    $ npm install dotenv --save
-
 ### Create a PostgreSQL database
+
     $ psql postgres -U postgres
 
     # create database ${DATABASE};
@@ -53,27 +41,21 @@ Create a .env file and populate it. The .env-example file provides a template fo
 
 ### Migrating the database
 
-Install flyway
-		
-        $ npm install flywaydb-cli --save
-
 When setting up the database for the first time:
 
     Create a file in conf/ called flyway.conf. The conf/example-flyway.conf file provides a template for this.
     
     Perform the initial migration using the following:
-        $ npm run fw-clean
-        $ npm run fw-migrate
+        $ npm run fw:clean
+        $ npm run fw:migrate
         
-
-
 After that initial setup, run migrations as necessary using:
 
-		$ npm run fw-migrate
+		$ npm run fw:migrate
 
 ## Running the application
 
-	$ npm start
+	$ npm run start
 
 ## Running the test
 
