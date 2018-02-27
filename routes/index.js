@@ -23,7 +23,17 @@ var db = require('../queries');
  *         description: The report category
  *       permitted_parameters:
  *         type: object
- *         description: The json schema of parameters associated with the report. They are defined with permitted keys and values which should come from the file provenance report 
+ *         additionalProperties:
+ *           type: object
+ *           properties:
+ *             required:
+ *               type: boolean
+ *               description: Whether this parameter must be provided
+ *               readOnly: true
+ *             type:
+ *               type: string
+ *               description: The Shesmu type signature of this parameter
+ *               readOnly: true
  *   report_record:
  *     properties:
  *       report_record_id:
