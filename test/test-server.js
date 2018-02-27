@@ -66,10 +66,8 @@ describe('report', function() {
         "version": "1.0",
         "category": "report",
         "permitted_parameters": {
-            "type":"object", 
-            "required":"false",
-            "properties": {"Instrument":{"type":"string", "required":"false"},
-                           "runName":{"type":"string", "required":"false"}}
+            "Instrument":{"type":"string", "required":"false"},
+            "runName":{"type":"string", "required":"false"}
          }
         })
       .end(function(err, res){
@@ -153,7 +151,7 @@ describe('report_record', function() {
     chai.request(server)
       .post('/reportdb/record')
       .send({
-    	"report_id": 4,
+        "report_id": 1,
         "date_generated": "2018-01-19T14:43:12.518Z",
         "freshest_input_date": "2018-01-19T14:43:12.518Z",
         "files_in": ["p1", "p2", "p3", "p4"],
@@ -165,7 +163,7 @@ describe('report_record', function() {
        "notification_done": false,
        "parameters": {
           "runName":"180109_D00331_0293_BCC5BJANXX", 
-          "instrument":"HiSeq"
+          "Instrument":"HiSeq"
         }
       })
       .end(function(err, res){

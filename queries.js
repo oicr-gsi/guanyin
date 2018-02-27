@@ -8,6 +8,54 @@ var options = {
 var pgp = require('pg-promise')(options);
 var db = pgp(process.env.DB_CONNECTION);
 
+/**
+ * Check that a value matches the provided Shemu type signature.
+ *
+ * This returns the position in the type string where checking finished, or
+ * zero if the type is not valid.
+ */
+function typeCheck(type, value) {
+  switch(type.charAt(0)) {
+    case 'i':
+      return typeof(value) === 'number' ? 1 : 0;
+    case 's':
+      return typeof(value) === 'string' ? 1 : 0;
+    case 'd':
+      return typeof(value) === 'string' ? 1 : 0; // This is intentional
+    case 'b':
+      return typeof(value) === 'boolean' ? 1 : 0;
+    case 'a':
+      if (!Array.isArray(value)) {
+         return 0;
+      }
+      var result = Math.min.apply(null, value.map(child => typeCheck(type.substr(1), child)));
+      return result === 0 ? 0 : (result + 1);
+    case 't':
+      if (!Array.isArray(value)) {
+         return 0;
+      }
+      var match;
+      if ((match = /^([0-9]*)([^0-9].*)$/.exec(type.substr(1))) === null) {
+        return 0;
+      }
+      var offset = 0;
+      var count = parseInt(match[1]);
+      if (count != value.length) {
+        return 0;
+      }
+      for (var index = 0; index < count; index++) {
+        const inner = typeCheck(match[2].substr(offset), value[index]);
+        if (inner === 0) {
+          return 0;
+        }
+        offset += inner;
+      }
+      return offset;
+    default:
+      return 0;
+  }
+}
+
 // add query functions
   
 function getAllReports(req, res, next) {
@@ -97,14 +145,45 @@ function getSingleReportrecord(req, res, next) {
 }
 
 function createReportrecord(req, res, next) {
-  req.body.report_id = parseInt(req.body.report_id);
-  db.one('insert into report_record(report_id, date_generated, freshest_input_date, files_in, report_path, notification_targets, notification_message, parameters)' +
-      'values(${report_id}, ${date_generated}, ${freshest_input_date}, ${files_in}, ${report_path}, ${notification_targets}, ${notification_message}, ${parameters})' +
-      'returning report_record_id',
-    req.body)
-    .then(function (data) {
-      res.status(200)
-        .json(data);
+  var reportID = parseInt(req.body.report_id);
+  req.body.report_id = reportID;
+  db.one('select * from report where report_id = $1', reportID)
+    .then(function (report) {
+      var permittedNames = Object.keys(report.permitted_parameters);
+      for (var nameIndex = 0; nameIndex < permittedNames.length; nameIndex++) {
+        var name = permittedNames[nameIndex];
+        if (req.body.parameters.hasOwnProperty(name)) {
+          let type = report.permitted_parameters[name].type;
+          if (typeCheck(type, req.body.parameters[name]) !== type.length) {
+            res.status(400).send('Invalid value for parameter ' + name + '. Expected type ' + report.permitted_parameters[name].type + '.');
+            return;
+          }
+        } else if (report.permitted_parameters[name].required) {
+          res.status(400).send('Report requires ' + name + ', but paramter not supplied.');
+          return;
+        }
+      }
+      var providedNames = Object.keys(req.body.parameters);
+      for (nameIndex = 0; nameIndex < providedNames.length; nameIndex++) {
+        name = providedNames[nameIndex];
+        if (!report.permitted_parameters.hasOwnProperty(name)) {
+          res.status(400).send('Invalid parameter ' + name + ' provided.');
+          return;
+        }
+      }
+
+      db.one('insert into report_record(report_id, date_generated, freshest_input_date, files_in, report_path, notification_targets, notification_message, parameters)' +
+          'values(${report_id}, ${date_generated}, ${freshest_input_date}, ${files_in}, ${report_path}, ${notification_targets}, ${notification_message}, ${parameters})' +
+          'returning report_record_id',
+        req.body)
+        .then(function (data) {
+          res.status(200)
+            .json(data);
+        })
+        .catch(function (err) {
+          return next(err);
+        });
+
     })
     .catch(function (err) {
       return next(err);
