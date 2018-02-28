@@ -156,9 +156,7 @@ describe('report_record', function() {
     	"report_id": 4,
         "date_generated": "2018-01-19T14:43:12.518Z",
         "freshest_input_date": "2018-01-19T14:43:12.518Z",
-        "files_in": {
-          "file_path":["p1", "p2", "P3", "P4"]
-        },
+        "files_in": ["p1", "p2", "p3", "p4"],
        "report_path": "https://www.hpc.oicr.on.ca/archive/web/runReports/180109_D00331_0293_BCC5BJANXX/180109_D00331_0293_BCC5BJANXX_report.html",
        "notification_targets": {
           "email": "seqprodbio@lists.oicr.on.ca, GenomeTechnologies@oicr.on.ca"
@@ -198,9 +196,7 @@ describe('report_record', function() {
     chai.request(server)
     .post('/reportdb/record_files?name=jsonReport&version=1.1')
     .send ({
-       "files_in": {
-          "file_path":["p1", "p2"]
-        }
+       "files_in":["p1", "p2"]
      })
       .end(function(err, res){
         res.should.have.status(200);
@@ -224,9 +220,7 @@ describe('report_record', function() {
     chai.request(server)
       .post('/reportdb/record_files?name=jsonReport&version=1.1')
       .send ({
-       "files_in": {
-          "file_path":["p1", "p2", "p3", "p5"]
-        }
+       "files_in": ["p1", "p2", "p3", "p5"]
       })
       .end(function(err, res){
         res.should.have.status(200);

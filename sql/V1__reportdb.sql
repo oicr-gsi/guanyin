@@ -16,7 +16,7 @@ CREATE TABLE report_record (
         report_id integer REFERENCEs report (report_id),
         date_generated timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
         freshest_input_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        files_in jsonb,
+        files_in text[],
         report_path text NOT NULL,
         notification_targets jsonb,
         notification_message text,
