@@ -42,8 +42,8 @@ var db = require('../queries');
  *         format: date-time
  *         description: The last modified date of the newest file
  *       files_in:
- *         type: object
- *         description: The json object. The list of input file paths which generated the report
+ *         type: array
+ *         description: The list of input file paths which generated the report. The array should be sorted. 
  *       report_path:
  *         type: string
  *         description: The report file path
