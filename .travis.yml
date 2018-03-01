@@ -22,6 +22,7 @@ before_script:
   
 script:
     - npm run test
+    - npm run lint
 
 cache:
   directories:

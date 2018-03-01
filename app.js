@@ -72,6 +72,7 @@ if (app.get('env') === 'development') {
       status: 'error',
       message: err
     });
+    next();
   });
 }
 
@@ -83,6 +84,7 @@ app.use(function(err, req, res, next) {
     status: 'error',
     message: err.message
   });
+  next();
 });
 
 module.exports = app;
