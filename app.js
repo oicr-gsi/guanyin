@@ -70,6 +70,7 @@ app.use(function(req, res, next) {
 });
 
 if (app.get('env') === 'development') {
+  // where does app.set('env') happen?
   app.use(function(err, req, res, next) {
     res.status(err.status || 500).json({
       status: 'error',
@@ -84,7 +85,7 @@ if (app.get('env') === 'development') {
 app.use(function(err, req, res, next) {
   res.status(err.status || 500).json({
     status: 'error',
-    message: err.message
+    message: err.message // will you want to log any of these errors?
   });
   next();
 });
