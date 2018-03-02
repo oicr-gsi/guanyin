@@ -10,7 +10,15 @@
     "fw:migrate": "flyway -X -configFile=conf/flyway.conf -locations=filesystem:./sql/ migrate",
     "fw:test-clean": "flyway -X -configFile=conf/flyway-test.conf clean",
     "fw:test-migrate": "flyway -X -configFile=conf/flyway-test.conf -locations=filesystem:./test/sql/ migrate",
-    "test": "PORT=8080 DB_CONNECTION=postgres://test:test@localhost:5432/test_report_db mocha --exit"
+    "test": "PORT=8080 DB_CONNECTION=postgres://test:test@localhost:5432/test_report_db mocha --exit",
+    "lint": "eslint .",
+    "precommit": "lint-staged"
+  },
+  "lint-staged": {
+    "*.js": [
+      "prettier --single-quote --write",
+      "git add"
+    ]
   },
   "repository": {
     "type": "git"
@@ -34,7 +42,11 @@
   "devDependencies": {
     "chai": "^4.1.2",
     "chai-http": "^3.0.0",
+    "eslint": "^4.18.1",
+    "husky": "^0.14.3",
+    "lint-staged": "^7.0.0",
     "mocha": "^5.0.0",
-    "nodemon": "^1.14.11"
+    "nodemon": "^1.14.11",
+    "prettier": "^1.11.1"
   }
 }

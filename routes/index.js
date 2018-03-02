@@ -42,18 +42,18 @@ var db = require('../queries');
  *         readOnly: true
  *       report_id:
  *         type: integer
- *         description: The report ID  
+ *         description: The report ID
  *       date_generated:
  *         type: string
  *         format: date-time
- *         description: The date when the report was generated 
- *       freshest_input_date: 
+ *         description: The date when the report was generated
+ *       freshest_input_date:
  *         type: string
  *         format: date-time
  *         description: The last modified date of the newest file
  *       files_in:
  *         type: array
- *         description: The list of input file paths which generated the report. The array should be sorted. 
+ *         description: The list of input file paths which generated the report. The array should be sorted.
  *       report_path:
  *         type: string
  *         description: The report file path
@@ -68,9 +68,9 @@ var db = require('../queries');
  *         description: The report has been notified or not
  *       parameters:
  *         type: object
- *         description: The json object. The parameters used when generating the report. It complies with the permitted parameter json schema.	
+ *         description: The json object. The parameters used when generating the report. It complies with the permitted parameter json schema.
  */
-   
+
 /**
  * @swagger
  * /reportdb/reports:
@@ -277,7 +277,10 @@ router.post('/reportdb/record', db.createReportrecord);
  *       200:
  *         description: Successfully updated
  */
-router.put('/reportdb/record_notification', db.updateReportrecord_notification_done);
+router.put(
+  '/reportdb/record_notification',
+  db.updateReportrecord_notification_done
+);
 
 /**
  * @swagger
@@ -306,7 +309,7 @@ router.put('/reportdb/record_notification', db.updateReportrecord_notification_d
  *         description: A list of report records with the given report name, version and files_in
  *         schema:
  *           $ref: '#/definitions/report_record'
-  */
+ */
 router.post('/reportdb/record_files', db.findReportrecord_files_in);
 
 /**
@@ -336,8 +339,8 @@ router.post('/reportdb/record_files', db.findReportrecord_files_in);
  *         description: A list of report records with the given report name, version and parameters
  *         schema:
  *           $ref: '#/definitions/report_record'
-  */
- 
+ */
+
 router.post('/reportdb/record_parameters', db.findReportrecord_parameters);
 
 module.exports = router;

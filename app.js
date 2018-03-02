@@ -3,7 +3,7 @@
 require('dotenv').config();
 var express = require('express');
 var path = require('path');
-var favicon = require('serve-favicon');
+//var favicon = require('serve-favicon'); // re-add when we get a favicon
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
@@ -20,9 +20,9 @@ var swaggerDefinition = {
   info: {
     title: 'ReportDB API',
     version: '1.0.0',
-    description: 'API for the ReportDB project',
+    description: 'API for the ReportDB project'
   },
-  basePath: '/',
+  basePath: '/'
 };
 
 // options for the swagger docs
@@ -30,7 +30,7 @@ var options = {
   // import swaggerDefinitions
   swaggerDefinition: swaggerDefinition,
   // path to the API docs
-  apis: ['./routes/*.js'],
+  apis: ['./routes/*.js']
 };
 
 // initialize swagger-jsdoc
@@ -64,25 +64,24 @@ app.use(function(req, res, next) {
   next(err);
 });
 
-
 if (app.get('env') === 'development') {
   app.use(function(err, req, res, next) {
-    res.status( err.code || 500 )
-    .json({
+    res.status(err.code || 500).json({
       status: 'error',
       message: err
     });
+    next();
   });
 }
 
 // production error handler
 // no stacktraces leaked to user
 app.use(function(err, req, res, next) {
-  res.status(err.status || 500)
-  .json({
+  res.status(err.status || 500).json({
     status: 'error',
     message: err.message
   });
+  next();
 });
 
 module.exports = app;
