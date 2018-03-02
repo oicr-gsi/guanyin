@@ -7,6 +7,8 @@ var path = require('path');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+const prometheus = require('prom-client');
+prometheus.collectDefaultMetrics({ timeout: 5000 });
 
 var index = require('./routes/index');
 var users = require('./routes/users');
@@ -56,6 +58,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', index);
 app.use('/users', users);
+app.get('/metrics', async (req, res) => {
+  res.set('Content-Type', prometheus.register.contentType);
+  res.end(prometheus.register.metrics());
+});
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
