@@ -9,7 +9,7 @@ var pgp = require('pg-promise')(options);
 var db = pgp(process.env.DB_CONNECTION);
 
 /**
- * Check that a value matches the provided Shemu type signature.
+ * Check that a value matches the provided Shesmu type signature.
  *
  * This returns the position in the type string where checking finished, or
  * zero if the type is not valid.
