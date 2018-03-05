@@ -38,7 +38,8 @@
     "pg-promise": "^7.5.4",
     "prom-client": "^10.2.3",
     "serve-favicon": "~2.4.5",
-    "swagger-jsdoc": "^1.9.7"
+    "swagger-jsdoc": "^1.9.7",
+    "winston": "^2.4.0"
   },
   "devDependencies": {
     "chai": "^4.1.2",

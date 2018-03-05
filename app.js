@@ -3,15 +3,14 @@
 require('dotenv').config();
 var express = require('express');
 var path = require('path');
-//var favicon = require('serve-favicon'); // re-add when we get a favicon
-var logger = require('morgan');
+var favicon = require('serve-favicon');
+const logger = require('./utils/logger');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 const prometheus = require('prom-client');
 prometheus.collectDefaultMetrics({ timeout: 5000 });
 
 var index = require('./routes/index');
-var users = require('./routes/users');
 
 var swaggerJSDoc = require('swagger-jsdoc');
 
@@ -48,22 +47,25 @@ app.get('/swagger.json', function(req, res) {
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
-// uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+
+app.use((req, res, next) => {
+  // log the request method and URL
+  logger.info({ method: req.method, url: req.originalUrl });
+  next();
+});
 
 app.use('/', index);
-app.use('/users', users);
 app.get('/metrics', async (req, res) => {
   res.set('Content-Type', prometheus.register.contentType);
   res.end(prometheus.register.metrics());
 });
 
-// catch 404 and forward to error handler
+// catch 404 for all other endpoints and forward to error handler
 app.use(function(req, res, next) {
   var err = new Error('Not Found');
   err.status = 404;
@@ -72,7 +74,7 @@ app.use(function(req, res, next) {
 
 if (app.get('env') === 'development') {
   app.use(function(err, req, res, next) {
-    res.status(err.code || 500).json({
+    res.status(err.status || 500).json({
       status: 'error',
       message: err
     });
@@ -83,10 +85,16 @@ if (app.get('env') === 'development') {
 // production error handler
 // no stacktraces leaked to user
 app.use(function(err, req, res, next) {
-  res.status(err.status || 500).json({
-    status: 'error',
-    message: err.message
-  });
+  if (!err.status) {
+    // unexpected error, so log it
+    logger.error({ url: req.originalUrl, message: err.message });
+  } else {
+    res.status(err.status || 500).json({
+      status: 'error',
+      message: err.message
+    });
+  }
+  res.end();
   next();
 });
 
