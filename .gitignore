@@ -4,3 +4,5 @@ conf/flyway.conf
 .env
 # node modules (they'll all be unpacked with npm install anyway)
 node_modules/
+# logs
+logs/*.log
