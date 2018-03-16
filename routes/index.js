@@ -1,7 +1,10 @@
+'use strict';
 var express = require('express');
 var router = express.Router();
 
 var db = require('../queries');
+const Joi = require('joi');
+const expressJoi = require('express-joi-validator');
 
 /**
  * @swagger
@@ -86,6 +89,7 @@ var db = require('../queries');
  *         schema:
  *           $ref: '#/definitions/report'
  */
+
 router.get('/reportdb/reports', db.getAllReports);
 
 /**
@@ -109,7 +113,18 @@ router.get('/reportdb/reports', db.getAllReports);
  *         schema:
  *           $ref: '#/definitions/report'
  */
-router.get('/reportdb/report/:id', db.getSingleReport);
+
+const paramsSchema = {
+  params: {
+    id: Joi.number().required()
+  }
+};
+
+router.get(
+  '/reportdb/report/:id',
+  expressJoi(paramsSchema),
+  db.getSingleReport
+);
 
 /**
  * @swagger
@@ -132,7 +147,17 @@ router.get('/reportdb/report/:id', db.getSingleReport);
  *         schema:
  *           $ref: '#/definitions/report'
  */
-router.get('/reportdb/report', db.getAllreports_by_name);
+
+const querySchema_report = {
+  query: {
+    name: Joi.string().required()
+  }
+};
+router.get(
+  '/reportdb/report',
+  expressJoi(querySchema_report),
+  db.getAllreports_by_name
+);
 
 /**
  * @swagger
@@ -160,7 +185,26 @@ router.get('/reportdb/report', db.getAllreports_by_name);
  *               type: integer
  *               description: The report id generated when creating the new report
  */
-router.post('/reportdb/report', db.createReport);
+
+const bodySchema_report = {
+  body: {
+    name: Joi.string().required(),
+    version: Joi.string().required(),
+    category: Joi.string().required(),
+    permitted_parameters: Joi.object().pattern(
+      /^\w+$/,
+      Joi.object().keys({
+        type: Joi.string().required(),
+        required: Joi.boolean().required()
+      })
+    )
+  }
+};
+router.post(
+  '/reportdb/report',
+  expressJoi(bodySchema_report, { convert: false }),
+  db.createReport
+);
 
 /**
  * @swagger
@@ -200,7 +244,11 @@ router.get('/reportdb/records', db.getAllReportrecords);
  *         schema:
  *           $ref: '#/definitions/report_record'
  */
-router.get('/reportdb/record/:id', db.getSingleReportrecord);
+router.get(
+  '/reportdb/record/:id',
+  expressJoi(paramsSchema),
+  db.getSingleReportrecord
+);
 
 /**
  * @swagger
@@ -223,7 +271,17 @@ router.get('/reportdb/record/:id', db.getSingleReportrecord);
  *         schema:
  *           $ref: '#/definitions/report_record'
  */
-router.get('/reportdb/record', db.getAllreportrecords_by_notification_done);
+
+const querySchema_record = {
+  query: {
+    notification_done: Joi.boolean().required()
+  }
+};
+router.get(
+  '/reportdb/record',
+  expressJoi(querySchema_record),
+  db.getAllreportrecords_by_notification_done
+);
 
 /**
  * @swagger
@@ -251,7 +309,28 @@ router.get('/reportdb/record', db.getAllreportrecords_by_notification_done);
  *               type: integer
  *               description: The report record id generated when creating the new report record
  */
-router.post('/reportdb/record', db.createReportrecord);
+
+const bodySchema_record = {
+  body: {
+    report_id: Joi.number().required(),
+    date_generated: Joi.date(),
+    freshest_input_date: Joi.date(),
+    files_in: Joi.array().items(Joi.string().required()),
+    report_path: Joi.string().required(),
+    notification_targets: Joi.object().keys({
+      email: Joi.array().items(Joi.string().email()),
+      slack: Joi.array().items(Joi.string())
+    }),
+    notification_message: Joi.string(),
+    notification_done: Joi.boolean(),
+    parameters: Joi.object().pattern(/^\w+$/, Joi.any().required())
+  }
+};
+router.post(
+  '/reportdb/record',
+  expressJoi(bodySchema_record),
+  db.createReportrecord
+);
 
 /**
  * @swagger
@@ -277,8 +356,16 @@ router.post('/reportdb/record', db.createReportrecord);
  *       200:
  *         description: Successfully updated
  */
+
+const querySchema_update_record_notification = {
+  query: {
+    report_record_id: Joi.number().required(),
+    notification_done: Joi.boolean().required()
+  }
+};
 router.put(
   '/reportdb/record_notification',
+  expressJoi(querySchema_update_record_notification),
   db.updateReportrecord_notification_done
 );
 
@@ -310,7 +397,21 @@ router.put(
  *         schema:
  *           $ref: '#/definitions/report_record'
  */
-router.post('/reportdb/record_files', db.findReportrecord_files_in);
+
+const Schema_record_files_in = {
+  query: {
+    name: Joi.string().required(),
+    version: Joi.string().required()
+  },
+  body: {
+    files_in: Joi.array().items(Joi.string().required())
+  }
+};
+router.post(
+  '/reportdb/record_files',
+  expressJoi(Schema_record_files_in),
+  db.findReportrecord_files_in
+);
 
 /**
  * @swagger
@@ -341,6 +442,19 @@ router.post('/reportdb/record_files', db.findReportrecord_files_in);
  *           $ref: '#/definitions/report_record'
  */
 
-router.post('/reportdb/record_parameters', db.findReportrecord_parameters);
+const Schema_record_parameters = {
+  query: {
+    name: Joi.string().required(),
+    version: Joi.string().required()
+  },
+  body: {
+    parameters: Joi.object().pattern(/^\w+$/, Joi.any().required())
+  }
+};
+router.post(
+  '/reportdb/record_parameters',
+  expressJoi(Schema_record_parameters),
+  db.findReportrecord_parameters
+);
 
 module.exports = router;
