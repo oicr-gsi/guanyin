@@ -67,11 +67,11 @@ describe('report', function() {
       .post('/reportdb/report')
       .send({
         name: 'jsonReport',
-        version: '1.0',
+        version: '2.0',
         category: 'report',
         permitted_parameters: {
-          Instrument: { type: 'string', required: 'false' },
-          runName: { type: 'string', required: 'false' }
+          Instrument: { type: 'string', required: false },
+          runName: { type: 'string', required: false }
         }
       })
       .end(function(err, res) {
@@ -165,14 +165,17 @@ describe('report_record', function() {
         report_path:
           'https://www.hpc.oicr.on.ca/archive/web/runReports/180109_D00331_0293_BCC5BJANXX/180109_D00331_0293_BCC5BJANXX_report.html',
         notification_targets: {
-          email: 'seqprodbio@lists.oicr.on.ca, GenomeTechnologies@oicr.on.ca'
+          email: [
+            'seqprodbio@lists.oicr.on.ca',
+            'GenomeTechnologies@oicr.on.ca'
+          ]
         },
         notification_message:
           'Here is the report: https://www.hpc.oicr.on.ca/archive/web/runReports/180109_D00331_0293_BCC5BJANXX/180109_D00331_0293_BCC5BJANXX_report.html',
         notification_done: false,
         parameters: {
           runName: '180109_D00331_0293_BCC5BJANXX',
-          Instrument: 'HiSeq'
+          instrument: 'HiSeq'
         }
       })
       .end(function(err, res) {
