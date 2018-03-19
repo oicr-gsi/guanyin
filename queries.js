@@ -59,6 +59,45 @@ function typeCheck(type, value) {
   }
 }
 
+/**
+ * validate parameters against permitted parameters
+ */
+function validateParameters(req, res, permitted_parameters) {
+  var permittedNames = Object.keys(permitted_parameters);
+  for (var nameIndex = 0; nameIndex < permittedNames.length; nameIndex++) {
+    var name = permittedNames[nameIndex];
+    if (req.body.parameters.hasOwnProperty(name)) {
+      let type = permitted_parameters[name].type;
+      if (typeCheck(type, req.body.parameters[name]) !== type.length) {
+        res
+          .status(400)
+          .send(
+            'Invalid value for parameter ' +
+              name +
+              '. Expected type ' +
+              permitted_parameters[name].type +
+              '.'
+          );
+        return 0;
+      }
+    } else if (permitted_parameters[name].required) {
+      res
+        .status(400)
+        .send('Report requires ' + name + ', but paramter not supplied.');
+      return 0;
+    }
+  }
+  var providedNames = Object.keys(req.body.parameters);
+  for (nameIndex = 0; nameIndex < providedNames.length; nameIndex++) {
+    name = providedNames[nameIndex];
+    if (!permitted_parameters.hasOwnProperty(name)) {
+      res.status(400).send('Invalid parameter ' + name + ' provided.');
+      return 0;
+    }
+  }
+  return 1;
+}
+
 // add query functions
 
 function getAllReports(req, res, next) {
@@ -156,39 +195,10 @@ function createReportrecord(req, res, next) {
   db
     .one('select * from report where report_id = $1', reportID)
     .then(function(report) {
-      var permittedNames = Object.keys(report.permitted_parameters);
-      for (var nameIndex = 0; nameIndex < permittedNames.length; nameIndex++) {
-        var name = permittedNames[nameIndex];
-        if (req.body.parameters.hasOwnProperty(name)) {
-          let type = report.permitted_parameters[name].type;
-          if (typeCheck(type, req.body.parameters[name]) !== type.length) {
-            res
-              .status(400)
-              .send(
-                'Invalid value for parameter ' +
-                  name +
-                  '. Expected type ' +
-                  report.permitted_parameters[name].type +
-                  '.'
-              );
-            return;
-          }
-        } else if (report.permitted_parameters[name].required) {
-          res
-            .status(400)
-            .send('Report requires ' + name + ', but paramter not supplied.');
-          return;
-        }
+      var permitted_parameters = report.permitted_parameters;
+      if (!validateParameters(req, res, permitted_parameters)) {
+        return;
       }
-      var providedNames = Object.keys(req.body.parameters);
-      for (nameIndex = 0; nameIndex < providedNames.length; nameIndex++) {
-        name = providedNames[nameIndex];
-        if (!report.permitted_parameters.hasOwnProperty(name)) {
-          res.status(400).send('Invalid parameter ' + name + ' provided.');
-          return;
-        }
-      }
-
       db
         .one(
           'insert into report_record(report_id, date_generated, freshest_input_date, files_in, report_path, notification_targets, notification_message, parameters)' +
@@ -211,8 +221,8 @@ function createReportrecord(req, res, next) {
 function updateReportrecord_notification_done(req, res, next) {
   db
     .none(
-      'update report_record set notification_done=$1 where report_record_id=$2',
-      [req.query.notification_done, parseInt(req.query.report_record_id)]
+      'update report_record set notification_done=$2 where report_record_id=$1',
+      [parseInt(req.query.report_record_id), req.query.notification_done]
     )
     .then(function() {
       res.status(200).json({
@@ -240,13 +250,30 @@ function findReportrecord_files_in(req, res, next) {
 }
 
 function findReportrecord_parameters(req, res, next) {
+  var reportName = req.query.name;
+  var reportVersion = req.query.version;
   db
-    .any(
-      'select rr.* from report_record rr, report r  where r.report_id=rr.report_id and r.name = $1 and r.version = $2 and rr.parameters= $3',
-      [req.query.name, req.query.version, req.body.parameters]
-    )
-    .then(function(data) {
-      res.status(200).json(data);
+    .one('select * from report where name = $1 and version = $2', [
+      reportName,
+      reportVersion
+    ])
+    .then(function(report) {
+      var reportID = report.report_id;
+      var permitted_parameters = report.permitted_parameters;
+      if (!validateParameters(req, res, permitted_parameters)) {
+        return;
+      }
+      db
+        .any(
+          'select rr.* from report_record rr where rr.report_id=$1 and rr.parameters= $2',
+          [reportID, req.body.parameters]
+        )
+        .then(function(data) {
+          res.status(200).json(data);
+        })
+        .catch(function(err) {
+          return next(err);
+        });
     })
     .catch(function(err) {
       return next(err);
