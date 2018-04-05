@@ -43,9 +43,6 @@ function typeCheck(type, value) {
       }
       var offset = 0;
       var count = parseInt(match[1]);
-      if (count != value.length) {
-        return 0;
-      }
       for (var index = 0; index < count; index++) {
         const inner = typeCheck(match[2].substr(offset), value[index]);
         if (inner === 0) {
@@ -53,7 +50,7 @@ function typeCheck(type, value) {
         }
         offset += inner;
       }
-      return offset;
+      return offset + match[1].length + 1;
     default:
       return 0;
   }
