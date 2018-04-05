@@ -3,6 +3,7 @@
 require('dotenv').config();
 var express = require('express');
 var path = require('path');
+var morgan = require('morgan');
 var favicon = require('serve-favicon');
 const logger = require('./utils/logger');
 var cookieParser = require('cookie-parser');
@@ -48,6 +49,8 @@ app.get('/swagger.json', function(req, res) {
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
+
+app.use(morgan('common'));
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
