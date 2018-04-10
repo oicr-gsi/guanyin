@@ -77,24 +77,24 @@ app.use(function(req, res, next) {
   next(err);
 });
 
-if (app.get('env') === 'development') {
-  app.use(function(err, req, res, next) {
-    res.status(err.status || 500).json({
-      status: 'error',
-      message: err
-    });
-    next();
-  });
-}
-
 // production error handler
 // no stacktraces leaked to user
 app.use(function(err, req, res, next) {
   if (!err.status) {
-    // unexpected error, so log it
-    logger.error({ url: req.originalUrl, message: err.message });
+    if (err.isBoom) {
+      res
+        .status(err.output.statusCode)
+        .json({ message: err.data[0].message, path: err.data[0].path });
+    } else {
+      // unexpected error, so log it
+      logger.error({ url: req.originalUrl, message: err.message });
+      res.status(500).json({
+        status: 'error',
+        message: app.get('env') === 'development' ? err : 'system error' //return err only development env.
+      });
+    }
   } else {
-    res.status(err.status || 500).json({
+    res.status(err.status).json({
       status: 'error',
       message: err.message
     });
