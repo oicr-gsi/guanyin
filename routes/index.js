@@ -318,10 +318,14 @@ const bodySchema_record = {
     files_in: Joi.array().items(Joi.string().required()),
     report_path: Joi.string().required(),
     notification_targets: Joi.object().keys({
-      email: Joi.array().items(Joi.string().email()),
-      slack: Joi.array().items(Joi.string())
+      email: Joi.array()
+        .allow(null)
+        .items(Joi.string().email()),
+      slack: Joi.array()
+        .allow(null)
+        .items(Joi.string())
     }),
-    notification_message: Joi.string(),
+    notification_message: Joi.string().allow(''),
     notification_done: Joi.boolean(),
     parameters: Joi.object().pattern(/^\w+$/, Joi.any().required())
   }
