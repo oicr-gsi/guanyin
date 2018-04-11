@@ -172,7 +172,6 @@ describe('report_record', function() {
         },
         notification_message:
           'Here is the report: https://www.hpc.oicr.on.ca/archive/web/runReports/180109_D00331_0293_BCC5BJANXX/180109_D00331_0293_BCC5BJANXX_report.html',
-        notification_done: false,
         parameters: {
           runName: '180109_D00331_0293_BCC5BJANXX',
           instrument: 'HiSeq'
