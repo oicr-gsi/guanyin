@@ -326,7 +326,6 @@ const bodySchema_record = {
         .items(Joi.string())
     }),
     notification_message: Joi.string().allow(''),
-    notification_done: Joi.boolean(),
     parameters: Joi.object().pattern(/^\w+$/, Joi.any().required())
   }
 };
