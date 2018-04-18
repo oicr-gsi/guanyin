@@ -198,8 +198,8 @@ function createReportrecord(req, res, next) {
       }
       db
         .one(
-          'insert into report_record(report_id, date_generated, freshest_input_date, files_in, report_path, notification_targets, notification_message, parameters)' +
-            'values(${report_id}, ${date_generated}, ${freshest_input_date}, ${files_in}, ${report_path}, ${notification_targets}, ${notification_message}, ${parameters})' +
+          'insert into report_record(report_id, finished, date_generated, freshest_input_date, files_in, report_path, notification_targets, notification_message, parameters)' +
+            'values(${report_id}, true, ${date_generated}, ${freshest_input_date}, ${files_in}, ${report_path}, ${notification_targets}, ${notification_message}, ${parameters})' +
             'returning report_record_id',
           req.body
         )
@@ -215,11 +215,58 @@ function createReportrecord(req, res, next) {
     });
 }
 
+function createReportrecordStart(req, res, next) {
+  var reportID = parseInt(req.query.report);
+  req.body.report_id = reportID;
+  db
+    .one('select * from report where report_id = $1', reportID)
+    .then(function(report) {
+      var permitted_parameters = report.permitted_parameters;
+      if (!validateParameters(req, res, permitted_parameters)) {
+        return;
+      }
+      db
+        .one(
+          'insert into report_record(report_id, finished, date_generated, parameters)' +
+            'values(${report_id}, false, NOW(), ${parameters})' +
+            'returning report_record_id',
+          req.body
+        )
+        .then(function(data) {
+          res.status(200).json(data);
+        })
+        .catch(function(err) {
+          return next(err);
+        });
+    })
+    .catch(function(err) {
+      return next(err);
+    });
+}
+
+function patchReportrecord(req, res, next) {
+  req.body.report_record_id = parseInt(req.params.id);
+  db
+    .one(
+      'update report_record set finished=true, freshest_input_date=${freshest_input_date}, files_in=${files_in}, report_path=${report_path}, notification_targets=${notification_targets}, notification_message=${notification_message} where report_record_id=${report_record_id} and finished=false returning report_record_id',
+      req.body
+    )
+    .then(function() {
+      res.status(200).json({
+        status: 'success',
+        message: 'Updated report record'
+      });
+    })
+    .catch(function(err) {
+      return next(err);
+    });
+}
+
 function updateReportrecord_notification_done(req, res, next) {
   db
-    .none(
-      'update report_record set notification_done=$2 where report_record_id=$1',
-      [parseInt(req.query.report_record_id), req.query.notification_done]
+    .one(
+      'update report_record set notification_done=true where report_record_id=$1 returning report_record_id',
+      [parseInt(req.params.id)]
     )
     .then(function() {
       res.status(200).json({
@@ -247,13 +294,19 @@ function findReportrecord_files_in(req, res, next) {
 }
 
 function findReportrecord_parameters(req, res, next) {
-  var reportName = req.query.name;
-  var reportVersion = req.query.version;
-  db
-    .one('select * from report where name = $1 and version = $2', [
-      reportName,
-      reportVersion
-    ])
+  let promise;
+  if (req.query.hasOwnProperty('report')) {
+    promise = db.one('select * from report where report_id = $1', [
+      parseInt(req.query.report)
+    ]);
+  } else {
+    promise = db.one('select * from report where name = $1 and version = $2', [
+      req.query.name,
+      req.query.version
+    ]);
+  }
+
+  promise
     .then(function(report) {
       var reportID = report.report_id;
       var permitted_parameters = report.permitted_parameters;
@@ -285,6 +338,8 @@ module.exports = {
   getAllReportrecords: getAllReportrecords,
   getSingleReportrecord: getSingleReportrecord,
   createReportrecord: createReportrecord,
+  createReportrecordStart: createReportrecordStart,
+  patchReportrecord: patchReportrecord,
   updateReportrecord_notification_done: updateReportrecord_notification_done,
   getAllreportrecords_by_notification_done: getAllreportrecords_by_notification_done,
   findReportrecord_files_in: findReportrecord_files_in,
