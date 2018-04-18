@@ -186,12 +186,10 @@ describe('report_record', function() {
       });
   });
 
-  it('should update a SINGLE report record on /reportdb/record_notification?report_record_id={report_record_id}&notification_done={notification_done} PUT', function(done) {
+  it('should update a SINGLE report record on /reportdb/record{report_record_id}/notification PUT', function(done) {
     chai
       .request(server)
-      .put(
-        '/reportdb/record_notification?report_record_id=1&notification_done=true'
-      )
+      .put('/reportdb/record/1/notification')
       .end(function(err, res) {
         res.should.have.status(200);
         res.should.be.json;

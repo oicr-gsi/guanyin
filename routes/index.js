@@ -337,7 +337,92 @@ router.post(
 
 /**
  * @swagger
- * /reportdb/record_notification?report_record_id={report_record_id}&notification_done={notification_done}:
+ * /reportdb/record_start:
+ *   post:
+ *     tags:
+ *       - report_record
+ *     description: Creates a new report record with most fields to be provided later
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: report_id
+ *         description: report id
+ *         in: path
+ *         required: true
+ *         type: integer
+ *       - name: report_record
+ *         description: report record object
+ *         in: body
+ *         required: true
+ *         schema:
+ *           $ref: '#/definitions/report_record'
+ *     responses:
+ *       200:
+ *         description: Successfully created
+ *         schema:
+ *           type: object
+ *           properties:
+ *             report_record_id:
+ *               type: integer
+ *               description: The report record id generated when creating the new report record
+ */
+
+const bodySchema_record_start = {
+  body: {
+    parameters: Joi.object().pattern(/^\w+$/, Joi.any().required())
+  }
+};
+router.post(
+  '/reportdb/record_start',
+  expressJoi(bodySchema_record_start),
+  db.createReportrecordStart
+);
+
+/**
+ * @swagger
+ * /reportdb/record:
+ *   patch:
+ *     tags:
+ *       - report_record
+ *     description: Updates fields in a record
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: report_record
+ *         description: report record object
+ *         in: body
+ *         required: true
+ *         schema:
+ *           $ref: '#/definitions/report_record'
+ *     responses:
+ *       200:
+ *         description: Successfully update
+ *         schema:
+ *           $ref: '#/definitions/report_record'
+ */
+
+const bodySchema_record_patch = {
+  body: {
+    freshest_input_date: Joi.date(),
+    files_in: Joi.array().items(Joi.string().required()),
+    report_path: Joi.string().required(),
+    notification_targets: Joi.object().keys({
+      email: Joi.array().items(Joi.string().email()),
+      slack: Joi.array().items(Joi.string())
+    }),
+    notification_message: Joi.string().allow(''),
+    notification_done: Joi.boolean()
+  }
+};
+router.patch(
+  '/reportdb/record/:id',
+  expressJoi(bodySchema_record_patch),
+  db.patchReportrecord
+);
+
+/**
+ * @swagger
+ * /reportdb/record/{report_record_id}/notification:
  *   put:
  *     tags:
  *       - report_record
@@ -350,24 +435,18 @@ router.post(
  *         in: query
  *         required: true
  *         type: integer
- *       - name: notification_done
- *         description: the report has been notified or not
- *         in: query
- *         required: true
- *         type: boolean
  *     responses:
  *       200:
  *         description: Successfully updated
  */
 
 const querySchema_update_record_notification = {
-  query: {
-    report_record_id: Joi.number().required(),
-    notification_done: Joi.boolean().required()
+  params: {
+    id: Joi.number().required()
   }
 };
 router.put(
-  '/reportdb/record_notification',
+  '/reportdb/record/:id/notification',
   expressJoi(querySchema_update_record_notification),
   db.updateReportrecord_notification_done
 );
@@ -426,14 +505,18 @@ router.post(
  *     produces:
  *       - application/json
  *     parameters:
+ *       - name: report
+ *         description: the id of the report (as an alternative to name and version)
+ *         in: query
+ *         required: false
  *       - name: name
  *         description: the name of the report
  *         in: query
- *         required: true
+ *         required: false
  *       - name: version
  *         description: the version of the report
  *         in: query
- *         required: true
+ *         required: false
  *       - name: parameters
  *         description: parameters used for generating the report
  *         in: body
@@ -447,8 +530,9 @@ router.post(
 
 const Schema_record_parameters = {
   query: {
-    name: Joi.string().required(),
-    version: Joi.string().required()
+    report: Joi.number().optional(),
+    name: Joi.string().optional(),
+    version: Joi.string().optional()
   },
   body: {
     parameters: Joi.object().pattern(/^\w+$/, Joi.any().required())

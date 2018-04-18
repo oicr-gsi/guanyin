@@ -9,7 +9,7 @@
     "fw:clean": "flyway -X -configFile=conf/flyway.conf clean",
     "fw:migrate": "flyway -X -configFile=conf/flyway.conf -locations=filesystem:./sql/ migrate",
     "fw:test-clean": "flyway -X -configFile=conf/flyway-test.conf clean",
-    "fw:test-migrate": "flyway -X -configFile=conf/flyway-test.conf -locations=filesystem:./test/sql/ migrate",
+    "fw:test-migrate": "flyway -X -configFile=conf/flyway-test.conf -locations=filesystem:./sql/,filesystem:./test/sql/ migrate",
     "test": "PORT=8080 DB_CONNECTION=postgres://test:test@localhost:5432/test_report_db mocha --exit",
     "lint": "eslint .",
     "precommit": "lint-staged"
