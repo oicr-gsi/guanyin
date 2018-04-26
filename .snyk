@@ -14,9 +14,15 @@ ignore:
     - express-joi-validator > boom > hoek:
         reason: no better option available
         expires: '2018-05-26T18:23:20.760Z'
+      joi > hoek:
+        reason: Unfortunately express-joi-validator requires joi@6 to be co-installed
+        expires: '2018-06-01T19:58:16.217Z'
     - express-joi-validator > joi > hoek:
         reason: no better option available
         expires: '2018-05-26T18:23:20.760Z'
+      joi > topo > hoek:
+        reason: Unfortunately express-joi-validator requires joi@6 to be co-installed
+        expires: '2018-06-01T19:58:16.217Z'
     - express-joi-validator > joi > topo > hoek:
         reason: no better option available
         expires: '2018-05-26T18:23:20.760Z'
