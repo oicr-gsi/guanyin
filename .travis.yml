@@ -14,6 +14,10 @@ env:
   global:
   - NODE_ENV=test    
 
+install:
+  - npm install
+  - npm install -g snyk
+
 before_script:
   - psql -c "create user test with password 'test' createdb;" -U postgres
   - psql -c "ALTER USER test WITH superuser;" -U postgres
@@ -22,6 +26,7 @@ before_script:
   - mkdir logs
   
 script:
+    - snyk test
     - npm run test
     - npm run lint
 
