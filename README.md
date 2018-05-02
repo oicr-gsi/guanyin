@@ -18,6 +18,14 @@ Checking for node:
 
     $ npm install
 
+### Linking Flyway after `npm install`
+Flyway is used here as a library rahter than as a package. It needs to be re-symlinked after `npm install`, using the following:
+```
+$ rm node_modules/.bin/flyway
+$ cd node_modules/.bin && ln -s ../flyway/lib/flyway-5.0.7/flyway flyway && cd -
+```
+Note: **Do not use `npm ci`** on this project, as it will remove the Flyway library from `node_modules`.
+
 ## Postgres setup
 
 ### Setting environment variables

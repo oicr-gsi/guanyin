@@ -4,5 +4,13 @@ conf/flyway.conf
 .env
 # node modules (they'll all be unpacked with npm install anyway)
 node_modules/
+# EXCEPT keep the Flyway directory because the flywaydb-cli package
+# has security vulnerabilities and hasn't been updated, so we're 
+# just keeping its output.
+# And also it won't guarantee which Flyway version you get (you get
+# the latest)
+!node_modules/flyway/
+!node_modules/flyway/*
+!node_modules/flyway/**/*
 # logs
 logs/*.log

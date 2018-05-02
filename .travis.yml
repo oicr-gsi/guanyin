@@ -15,7 +15,10 @@ env:
   - NODE_ENV=test    
 
 install:
-  - npm install
+  - npm install # note: do not use `npm ci` as it will remove flyway
+  - rm node_modules/.bin/flyway || true # don't error if the symlink doesn't exist
+  - cd node_modules/.bin && ln -s ../flyway/lib/flyway-5.0.7/flyway flyway && cd -
+  - ls -lh node_modules/.bin 
   - npm install -g snyk
 
 before_script:
