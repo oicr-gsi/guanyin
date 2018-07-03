@@ -40,6 +40,7 @@
     "prom-client": "^10.2.3",
     "serve-favicon": "~2.4.5",
     "swagger-jsdoc": "^1.9.7",
+    "uid": "0.0.2",
     "winston": "^2.4.2"
   },
   "devDependencies": {
