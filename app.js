@@ -8,10 +8,23 @@ var favicon = require('serve-favicon');
 const logger = require('./utils/logger');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+const ignoreFrom = process.env.IGNORE_ADDRESS || ''; // to skip logging of requests from IT's security tests
 //const expressJoi = require('express-joi-validator');
 //const Joi = require('joi');
 const prometheus = require('prom-client');
 prometheus.collectDefaultMetrics({ timeout: 5000 });
+const httpRequestDurationMilliseconds = new prometheus.Histogram({
+  name: 'http_request_duration_ms',
+  help: 'Duration of HTTP requests in ms',
+  labelNames: ['route'],
+  buckets: [0.1, 5, 15, 50, 100, 200, 300, 400, 500]
+});
+
+const httpRequestCounter = new prometheus.Counter({
+  name: 'http_request_counter',
+  help: 'Number of requests for this endpoint',
+  labelNames: ['route', 'method', 'status']
+});
 
 var index = require('./routes/index');
 
@@ -59,8 +72,22 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 
 app.use((req, res, next) => {
-  // log the request method and URL
-  logger.info({ method: req.method, url: req.originalUrl });
+  // have to manually set this because there's no guarantee it'll be called this in future versions of Express
+  req._startTime = new Date();
+  // generate a unique identifier for each request, if one hasn't already been set
+  if (!req.uid) req.uid = uid();
+  res.uid = req.uid;
+  if (
+    req.connection.remoteAddress != ignoreFrom &&
+    req.originalUrl != '/metrics'
+  ) {
+    logger.info({
+      uid: req.uid,
+      method: req.method,
+      url: req.originalUrl,
+      origin: req.connection.remoteAddress
+    });
+  }
   next();
 });
 
@@ -75,6 +102,16 @@ app.use(function(req, res, next) {
   var err = new Error('Not Found');
   err.status = 404;
   next(err);
+});
+app.use((req, res, next) => {
+  // log metrics after every request
+  if (req.connection.remoteAddress != ignoreFrom) {
+    const responseTimeInMs = Date.now() - Date.parse(req._startTime);
+    const path = req.route ? req.route.path : req.originalUrl;
+    httpRequestDurationMilliseconds.labels(path).observe(responseTimeInMs);
+    httpRequestCounter.labels(path, req.method, res.statusCode).inc();
+  }
+  next();
 });
 
 // production error handler
