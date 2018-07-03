@@ -8,6 +8,7 @@ var favicon = require('serve-favicon');
 const logger = require('./utils/logger');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+const uid = require('uid'); // generates a unique ID for each request
 const ignoreFrom = process.env.IGNORE_ADDRESS || ''; // to skip logging of requests from IT's security tests
 //const expressJoi = require('express-joi-validator');
 //const Joi = require('joi');
