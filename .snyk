@@ -4,8 +4,8 @@ version: v1.11.0
 ignore:
   'npm:braces:20180219':
     - swagger-jsdoc > chokidar > anymatch > micromatch > braces:
-        reason: no better option available
-        expires: '2018-05-26T18:23:20.760Z'
+        reason: no fix available yet
+        expires: '2018-08-03T14:01:17.161Z'
   'npm:clean-css:20180306':
     - jade > clean-css:
         reason: no better option available
@@ -15,17 +15,23 @@ ignore:
         reason: no better option available
         expires: '2018-05-26T18:23:20.760Z'
       joi > hoek:
-        reason: Unfortunately express-joi-validator requires joi@6 to be co-installed
-        expires: '2018-06-01T19:58:16.217Z'
+        reason: joi 6 required for express-joi-validator
+        expires: '2018-08-03T14:01:17.160Z'
     - express-joi-validator > joi > hoek:
         reason: no better option available
         expires: '2018-05-26T18:23:20.760Z'
       joi > topo > hoek:
-        reason: Unfortunately express-joi-validator requires joi@6 to be co-installed
-        expires: '2018-06-01T19:58:16.217Z'
+        reason: joi 6 required for express-joi-validator
+        expires: '2018-08-03T14:01:17.160Z'
     - express-joi-validator > joi > topo > hoek:
         reason: no better option available
         expires: '2018-05-26T18:23:20.760Z'
+    - joi > hoek:
+        reason: Unfortunately express-joi-validator requires joi@6 to be co-installed
+        expires: '2018-06-01T19:58:16.217Z'
+    - joi > topo > hoek:
+        reason: Unfortunately express-joi-validator requires joi@6 to be co-installed
+        expires: '2018-06-01T19:58:16.217Z'
 # patches apply the minimum changes required to fix a vulnerability
 patch:
   'npm:uglify-js:20150824':
@@ -34,3 +40,10 @@ patch:
   'npm:uglify-js:20151024':
     - jade > transformers > uglify-js:
         patched: '2018-04-26T18:21:50.977Z'
+  'npm:hoek:20180212':
+    - express-joi-validator > joi > hoek:
+        patched: '2018-07-04T13:59:49.694Z'
+    - express-joi-validator > joi > topo > hoek:
+        patched: '2018-07-04T13:59:49.694Z'
+    - express-joi-validator > boom > hoek:
+        patched: '2018-07-04T13:59:49.694Z'
