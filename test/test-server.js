@@ -43,6 +43,21 @@ describe('report', function() {
       });
   });
 
+  it('should fail to list a single report on /reportdb/report/:id GET when :id is not a number', function(done) {
+    chai
+      .request(server)
+      .get('/reportdb/report/one')
+      .end(function(err, res) {
+        res.should.have.status(400);
+        res.should.be.json;
+        res.body.should.be.a('object');
+        res.body.should.not.have.property('report_id');
+        res.body.should.have.keys('status', 'message');
+        res.body.message.should.have.string('"id" must be a number');
+        done();
+      });
+  });
+
   it('should list reports on /reportdb/report?name={name} GET', function(done) {
     chai
       .request(server)
