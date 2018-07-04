@@ -4,7 +4,7 @@ var router = express.Router();
 
 var db = require('../queries');
 const Joi = require('joi');
-const expressJoi = require('express-joi-validator');
+const expressJoi = require('../utils/express-joi-validator');
 
 /**
  * @swagger
