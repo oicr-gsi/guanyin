@@ -155,7 +155,7 @@ router.get(
  *         type: string
  *     responses:
  *       200:
- *         description: A list of reports with the given report name or LIMS entity
+ *         description: A list of reports with the given report name or associated with the given LIMS entity
  *         schema:
  *           $ref: '#/definitions/report'
  */
