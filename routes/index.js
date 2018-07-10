@@ -37,6 +37,12 @@ const expressJoi = require('../utils/express-joi-validator');
  *               type: string
  *               description: The Shesmu type signature of this parameter
  *               readOnly: true
+ *       lims_entity:
+ *         type:
+ *           - string
+ *         required: false
+ *         description: indicates which LIMS entity (if any) is associated with the report
+ *         enum: [Project, Library, Pool, Run]
  *   report_record:
  *     properties:
  *       report_record_id:
@@ -137,22 +143,34 @@ router.get(
  *       - application/json
  *     parameters:
  *       - name: name
- *         description: the name of the report
+ *         description: the name of the report (one of name or lims_entity must be specified)
  *         in: query
- *         required: true
+ *         required: false
+ *         type: string
+ *       - name: lims_entity
+ *         description: the type of LIMS entity associated with the report (one of name or lims_entity must be specified)
+ *         in: query
+ *         enum: [Project, Library, Pool, Run]
+ *         required: false
  *         type: string
  *     responses:
  *       200:
- *         description: A list of reports with the given report name
+ *         description: A list of reports with the given report name or LIMS entity
  *         schema:
  *           $ref: '#/definitions/report'
  */
 
-const querySchema_report = {
-  query: {
-    name: Joi.string().required()
-  }
-};
+const querySchema_report = Joi.object().keys({
+  query: Joi.object()
+    .keys({
+      name: Joi.string().required(),
+      lims_entity: Joi.string()
+        .valid('Project', 'Library', 'Pool', 'Run')
+        .required()
+    })
+    .xor('name', 'lims_entity')
+});
+
 router.get(
   '/reportdb/report',
   expressJoi(querySchema_report),
@@ -197,7 +215,10 @@ const bodySchema_report = {
         type: Joi.string().required(),
         required: Joi.boolean().required()
       })
-    )
+    ),
+    lims_entity: Joi.string()
+      .valid('Run', 'Pool', 'Library', 'Project')
+      .optional()
   }
 };
 router.post(

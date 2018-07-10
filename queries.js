@@ -133,10 +133,14 @@ function getAllreports_by_name(req, res, next) {
 }
 
 function createReport(req, res, next) {
+  if (!req.body.hasOwnProperty('lims_entity')) {
+    // property may be null if it is not associated with a LIMS entity (Project, Library, Run, Pool)
+    req.body.lims_entity = null;
+  }
   db
     .one(
-      'insert into report(name, version, category, permitted_parameters)' +
-        'values(${name}, ${version}, ${category}, ${permitted_parameters})' +
+      'insert into report(name, version, category, permitted_parameters, lims_entity)' +
+        'values(${name}, ${version}, ${category}, ${permitted_parameters}, ${lims_entity})' +
         'returning report_id',
       req.body
     )

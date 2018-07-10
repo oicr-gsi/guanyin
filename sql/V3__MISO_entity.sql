@@ -1,0 +1,1 @@
+ALTER TABLE report ADD COLUMN lims_entity text DEFAULT NULL;

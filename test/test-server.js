@@ -71,6 +71,7 @@ describe('report', function() {
         res.body[0].should.have.property('version');
         res.body[0].should.have.property('category');
         res.body[0].should.have.property('permitted_parameters');
+        res.body[0].should.have.property('lims_entity');
         res.body[0].name.should.equal('jsonReport');
         done();
       });
