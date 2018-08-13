@@ -9,50 +9,92 @@ var pgp = require('pg-promise')(options);
 var db = pgp(process.env.DB_CONNECTION);
 
 /**
- * Check that a value matches the provided Shesmu type signature.
+ * Parse a Shesmu type signature and return an object that can check and sort values.
  *
- * This returns the position in the type string where checking finished, or
- * zero if the type is not valid.
+ * This returns an object with three properties: check (checks if object
+ * matches signature), compare (compares two values and determines canonicalise
+ * order), canonicalise ("sort" a value), rest (the unparsed type string; this
+ * should be empty for a valid string). Null is returned if the type is not
+ * valid.
  */
-function typeCheck(type, value) {
+function parseShesmuType(type) {
   switch (type.charAt(0)) {
     case 'i':
-      return typeof value === 'number' ? 1 : 0;
+    case 'd': // This is intentional; dates are millis since the epoch
+      return {
+        check: value => typeof value === 'number',
+        compare: (a, b) => a - b,
+        canonicalise: value => value,
+        rest: type.substring(1)
+      };
     case 's':
-      return typeof value === 'string' ? 1 : 0;
-    case 'd':
-      return typeof value === 'string' ? 1 : 0; // This is intentional
+      return {
+        check: value => typeof value === 'string',
+        compare: (a, b) => a.localeCompare(b),
+        canonicalise: value => value,
+        rest: type.substring(1)
+      };
     case 'b':
-      return typeof value === 'boolean' ? 1 : 0;
+      return {
+        check: value => typeof value === 'boolean',
+        compare: (a, b) => a - b,
+        canonicalise: value => value,
+        rest: type.substring(1)
+      };
     case 'a':
-      if (!Array.isArray(value)) {
-        return 0;
-      }
-      var result = Math.min.apply(
-        null,
-        value.map(child => typeCheck(type.substr(1), child))
-      );
-      return result === 0 ? 0 : result + 1;
-    case 't':
-      if (!Array.isArray(value)) {
-        return 0;
-      }
-      var match;
-      if ((match = /^([0-9]*)([^0-9].*)$/.exec(type.substr(1))) === null) {
-        return 0;
-      }
-      var offset = 0;
-      var count = parseInt(match[1]);
-      for (var index = 0; index < count; index++) {
-        const inner = typeCheck(match[2].substr(offset), value[index]);
-        if (inner === 0) {
-          return 0;
+      return (() => {
+        const inner = parseShesmuType(type.substr(1));
+        if (inner == null) {
+          return null;
         }
-        offset += inner;
-      }
-      return offset + match[1].length + 1;
+        return {
+          check: value =>
+            Array.isArray(value) && value.every(child => inner.check(child)),
+          compare: (a, b) =>
+            a.length - b.length ||
+            a.reduce(
+              (acc, avalue, index) => acc || inner.compare(avalue, b[index]),
+              0
+            ),
+          canonicalise: value =>
+            value.map(inner.canonicalise).sort(inner.compare),
+          rest: inner.rest
+        };
+      })();
+    case 't':
+      return (() => {
+        let match;
+        if ((match = /^([0-9]*)([^0-9].*)$/.exec(type.substr(1))) === null) {
+          return null;
+        }
+        let rest = match[2];
+        const count = parseInt(match[1]);
+        const types = [];
+        for (let index = 0; index < count; index++) {
+          const type = parseShesmuType(rest);
+          if (type == null) {
+            return null;
+          }
+          rest = type.rest;
+          types.push(type);
+        }
+        return {
+          check: value =>
+            Array.isArray(value) &&
+            value.length == types.length &&
+            value.every((child, index) => types[index].check(child)),
+          compare: (a, b) =>
+            types.reduce(
+              (acc, type, index) => acc || type.compare(a[index], b[index]),
+              0
+            ),
+          canonicalise: value =>
+            value.map((child, index) => types[index].canonicalise(child)),
+          rest: rest
+        };
+      })();
     default:
-      return 0;
+      return null;
   }
 }
 
@@ -64,8 +106,8 @@ function validateParameters(req, res, permitted_parameters) {
   for (var nameIndex = 0; nameIndex < permittedNames.length; nameIndex++) {
     var name = permittedNames[nameIndex];
     if (req.body.parameters.hasOwnProperty(name)) {
-      let type = permitted_parameters[name].type;
-      if (typeCheck(type, req.body.parameters[name]) !== type.length) {
+      let type = parseShesmuType(permitted_parameters[name].type);
+      if (!type.check(req.body.parameters[name])) {
         res
           .status(400)
           .send(
@@ -77,6 +119,9 @@ function validateParameters(req, res, permitted_parameters) {
           );
         return 0;
       }
+      permitted_parameters[name] = type.canonicalise(
+        permitted_parameters[name]
+      );
     } else if (permitted_parameters[name].required) {
       res
         .status(400)
@@ -136,6 +181,14 @@ function createReport(req, res, next) {
   if (!req.body.hasOwnProperty('lims_entity')) {
     // property may be null if it is not associated with a LIMS entity (Project, Library, Run, Pool)
     req.body.lims_entity = null;
+  }
+  if (
+    !Object.values(req.body.permitted_parameters).every(p => {
+      const type = parseShesmuType(p.type);
+      return type != null && type.rest === '';
+    })
+  ) {
+    res.status(400).send('Invalid type signature on parameter.');
   }
   db
     .one(
