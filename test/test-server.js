@@ -86,8 +86,8 @@ describe('report', function() {
         version: '2.0',
         category: 'report',
         permitted_parameters: {
-          Instrument: { type: 'string', required: false },
-          runName: { type: 'string', required: false }
+          Instrument: { type: 's', required: false },
+          runName: { type: 's', required: false }
         }
       })
       .end(function(err, res) {
