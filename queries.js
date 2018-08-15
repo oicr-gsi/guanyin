@@ -119,9 +119,7 @@ function validateParameters(req, res, permitted_parameters) {
           );
         return 0;
       }
-      permitted_parameters[name] = type.canonicalise(
-        permitted_parameters[name]
-      );
+      req.body.parameters[name] = type.canonicalise(req.body.parameters[name]);
     } else if (permitted_parameters[name].required) {
       res
         .status(400)
