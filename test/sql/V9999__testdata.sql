@@ -17,7 +17,7 @@ Insert INTO report_record (report_id, files_in, report_path, notification_target
 VALUES (3, '{"p1", "p2", "p3"}', '/oicr/data/archive/r3','{"email":["xluo@oicr.on.ca","seqprobio@oicr.on.ca"]}', 'here is the coverage report for PCSI', '{"project":"PCSI", "instrument":"HiSeq"}');
 
 Insert INTO report (name, version, category, permitted_parameters)
-VALUES ('coveragereport', '1.1', 'report', '{"project":{"type":"s", "required":true}, "instrument":{"type":"s", "required":false}}');
+VALUES ('coveragereport', '1.1', 'report', '{"project":{"type":"s", "required":true}, "instrument":{"type":"o2name$sversion$i", "required":false}}');
 
 Insert INTO report_record (report_id, files_in, report_path, notification_targets, notification_message, parameters)
 VALUES (4, '{"p1", "p2", "p3", "p4"}', '/oicr/data/archive/r4','{"email":["xluo@oicr.on.ca","seqprobio@oicr.on.ca"]}', 'Here is the coverage report for HALT', '{"project":"HALT", "instrument":"MiSeq"}');
