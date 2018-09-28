@@ -62,6 +62,7 @@ function parseShesmuType(type) {
         };
       })();
     case 't':
+    case 'o':
       return (() => {
         let match;
         if ((match = /^([0-9]*)([^0-9].*)$/.exec(type.substr(1))) === null) {
@@ -69,29 +70,74 @@ function parseShesmuType(type) {
         }
         let rest = match[2];
         const count = parseInt(match[1]);
-        const types = [];
-        for (let index = 0; index < count; index++) {
-          const type = parseShesmuType(rest);
-          if (type == null) {
-            return null;
+        if (type.charAt(0) == 't') {
+          const types = [];
+          for (let index = 0; index < count; index++) {
+            const type = parseShesmuType(rest);
+            if (type == null) {
+              return null;
+            }
+            rest = type.rest;
+            types.push(type);
           }
-          rest = type.rest;
-          types.push(type);
+          return {
+            check: value =>
+              Array.isArray(value) &&
+              value.length == types.length &&
+              value.every((child, index) => types[index].check(child)),
+            compare: (a, b) =>
+              types.reduce(
+                (acc, type, index) => acc || type.compare(a[index], b[index]),
+                0
+              ),
+            canonicalise: value =>
+              value.map((child, index) => types[index].canonicalise(child)),
+            rest: rest
+          };
+        } else {
+          const fields = [];
+          for (let index = 0; index < count; index++) {
+            if ((match = /^([^$]*)\$(.*)$/.exec(rest)) === null) {
+              return null;
+            }
+            rest = match[2];
+            const type = parseShesmuType(rest);
+            if (type == null) {
+              return null;
+            }
+            rest = type.rest;
+            fields.push({ name: match[1], type: type });
+          }
+          return {
+            check: value =>
+              value !== null &&
+              typeof value == 'object' &&
+              !Array.isArray(value) &&
+              Object.keys(value).length == fields.length &&
+              fields.every(
+                field =>
+                  value[field.name] && field.type.check(value[field.name])
+              ),
+            compare: (a, b) =>
+              fields.reduce(
+                (acc, field) =>
+                  acc || field.type.compare(a[field.name], b[field.name]),
+                0
+              ),
+            canonicalise: value => {
+              const result = {};
+              fields.forEach(
+                field =>
+                  (result[field.name] = field.type.canonicalise(
+                    value[field.name]
+                  ))
+              );
+
+              return result;
+            },
+            rest: rest
+          };
         }
-        return {
-          check: value =>
-            Array.isArray(value) &&
-            value.length == types.length &&
-            value.every((child, index) => types[index].check(child)),
-          compare: (a, b) =>
-            types.reduce(
-              (acc, type, index) => acc || type.compare(a[index], b[index]),
-              0
-            ),
-          canonicalise: value =>
-            value.map((child, index) => types[index].canonicalise(child)),
-          rest: rest
-        };
       })();
     default:
       return null;
