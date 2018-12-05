@@ -128,7 +128,7 @@ app.use(function(err, req, res, next) {
       logger.error({ url: req.originalUrl, message: err.message });
       res.status(500).json({
         status: 'error',
-        message: app.get('env') === 'development' ? err : 'system error' //return err only development env.
+        message: app.get('env') === 'production' ? 'system error' : err //return err only in development env.
       });
     }
   } else {
