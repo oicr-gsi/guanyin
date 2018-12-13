@@ -125,13 +125,15 @@ app.use(function(err, req, res, next) {
         .json({ message: err.data[0].message, path: err.data[0].path });
     } else {
       // unexpected error, so log it
-      logger.error({ url: req.originalUrl, message: err.message });
+      logger.debug(err);
+      logger.debug({ url: req.originalUrl, message: err.message });
       res.status(500).json({
         status: 'error',
         message: app.get('env') === 'production' ? 'system error' : err //return err only in development env.
       });
     }
   } else {
+    logger.debug(err);
     res.status(err.status).json({
       status: 'error',
       message: err.message

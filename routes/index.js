@@ -1,8 +1,8 @@
 'use strict';
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 
-var db = require('../queries');
+const db = require('../queries');
 const Joi = require('joi');
 const expressJoi = require('../utils/express-joi-validator');
 
@@ -43,7 +43,59 @@ const expressJoi = require('../utils/express-joi-validator');
  *         required: false
  *         description: indicates which LIMS entity (if any) is associated with the report
  *         enum: [Project, Library, Pool, Run]
- *   report_record:
+ *   report_record_start:
+ *     properties:
+ *       date_generated:
+ *         type: string
+ *         format: date-time
+ *         description: The date when the report was generated
+ *       freshest_input_date:
+ *         type: string
+ *         format: date-time
+ *         description: The last modified date of the newest file
+ *       files_in:
+ *         type: array
+ *         description: The list of input file paths which generated the report. The array should be sorted.
+ *       report_path:
+ *         type: string
+ *         description: The report file path
+ *       notification_targets:
+ *         type: object
+ *         description: The json object. The targets such as email and Slack that receive the notice about the report
+ *       notification_message:
+ *         type: string
+ *         description: The message sent out to the notification targets
+ *       parameters:
+ *         type: object
+ *         description: The json object. The parameters used when generating the report. It complies with the permitted parameter json schema. *
+ *   report_record_patch:
+ *     properties:
+ *       report_record_id:
+ *         type: integer
+ *         description: The report record ID
+ *         readOnly: true
+ *       report_id:
+ *         type: integer
+ *         description: The report ID
+ *       files_in:
+ *         type: array
+ *         description: The list of input file paths which generated the report. The array should be sorted.
+ *       report_path:
+ *         type: string
+ *         description: The report file path
+ *       notification_targets:
+ *         type: object
+ *         description: The json object. The targets such as email and Slack that receive the notice about the report
+ *       notification_message:
+ *         type: string
+ *         description: The message sent out to the notification targets
+ *       notification_done:
+ *         type: boolean
+ *         description: The report has been notified or not
+ *       parameters:
+ *         type: object
+ *         description: The json object. The parameters used when generating the report. It complies with the permitted parameter json schema.
+ *   report_record_complete:
  *     properties:
  *       report_record_id:
  *         type: integer
@@ -175,6 +227,7 @@ router.get(
   '/reportdb/report',
   expressJoi(querySchema_report),
   db.getAllreports_by_name
+  // TODO: Fix to search separately by lims_entity (doesn't work!!)
 );
 
 /**
@@ -209,13 +262,15 @@ const bodySchema_report = {
     name: Joi.string().required(),
     version: Joi.string().required(),
     category: Joi.string().required(),
-    permitted_parameters: Joi.object().pattern(
-      /^\w+$/,
-      Joi.object().keys({
-        type: Joi.string().required(),
-        required: Joi.boolean().required()
-      })
-    ),
+    permitted_parameters: Joi.object()
+      .pattern(
+        /^\w+$/,
+        Joi.object().keys({
+          type: Joi.string().required(),
+          required: Joi.boolean().required()
+        })
+      )
+      .required(),
     lims_entity: Joi.string()
       .valid('Run', 'Pool', 'Library', 'Project')
       .optional()
@@ -240,7 +295,7 @@ router.post(
  *       200:
  *         description: An array of report records
  *         schema:
- *           $ref: '#/definitions/report_record'
+ *           $ref: '#/definitions/report_record_complete'
  */
 router.get('/reportdb/records', db.getAllReportrecords);
 
@@ -263,7 +318,7 @@ router.get('/reportdb/records', db.getAllReportrecords);
  *       200:
  *         description: A report record with the given report_record_id
  *         schema:
- *           $ref: '#/definitions/report_record'
+ *           $ref: '#/definitions/report_record_complete'
  */
 router.get(
   '/reportdb/record/:id',
@@ -290,7 +345,7 @@ router.get(
  *       200:
  *         description: A list of report records with the given notification_done
  *         schema:
- *           $ref: '#/definitions/report_record'
+ *           $ref: '#/definitions/report_record_complete'
  */
 
 const querySchema_record = {
@@ -319,7 +374,7 @@ router.get(
  *         in: body
  *         required: true
  *         schema:
- *           $ref: '#/definitions/report_record'
+ *           $ref: '#/definitions/report_record_start'
  *     responses:
  *       200:
  *         description: Successfully created
@@ -358,7 +413,7 @@ router.post(
 
 /**
  * @swagger
- * /reportdb/record_start:
+ * /reportdb/record_start/{report_id}:
  *   post:
  *     tags:
  *       - report_record
@@ -367,7 +422,7 @@ router.post(
  *       - application/json
  *     parameters:
  *       - name: report_id
- *         description: report id
+ *         description: report ID
  *         in: path
  *         required: true
  *         type: integer
@@ -376,7 +431,7 @@ router.post(
  *         in: body
  *         required: true
  *         schema:
- *           $ref: '#/definitions/report_record'
+ *           $ref: '#/definitions/report_record_start'
  *     responses:
  *       200:
  *         description: Successfully created
@@ -401,7 +456,7 @@ router.post(
 
 /**
  * @swagger
- * /reportdb/record:
+ * /reportdb/record/{id}:
  *   patch:
  *     tags:
  *       - report_record
@@ -414,12 +469,12 @@ router.post(
  *         in: body
  *         required: true
  *         schema:
- *           $ref: '#/definitions/report_record'
+ *           $ref: '#/definitions/report_record_patch'
  *     responses:
  *       200:
  *         description: Successfully update
  *         schema:
- *           $ref: '#/definitions/report_record'
+ *           $ref: '#/definitions/report_record_complete'
  */
 
 const bodySchema_record_patch = {
@@ -498,7 +553,7 @@ router.put(
  *       200:
  *         description: A list of report records with the given report name, version and files_in
  *         schema:
- *           $ref: '#/definitions/report_record'
+ *           $ref: '#/definitions/report_record_complete'
  */
 
 const Schema_record_files_in = {
@@ -526,7 +581,7 @@ router.post(
  *     produces:
  *       - application/json
  *     parameters:
- *       - name: report
+ *       - name: report ID
  *         description: the id of the report (as an alternative to name and version)
  *         in: query
  *         required: false
@@ -542,11 +597,13 @@ router.post(
  *         description: parameters used for generating the report
  *         in: body
  *         required: true
+ *         schema:
+ *           type: object
  *     responses:
  *       200:
  *         description: A list of report records with the given report name, version and parameters
  *         schema:
- *           $ref: '#/definitions/report_record'
+ *           $ref: '#/definitions/report_record_complete'
  */
 
 const Schema_record_parameters = {
