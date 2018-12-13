@@ -83,3 +83,16 @@ variables to create the database below.
 ### Run the tests
 
     $ npm test
+
+## Building and Running using Docker
+A container can be built using Docker. You will need an additional container
+running PostgreSQL.
+
+    docker build --target flyway-migration -t "oicrgsi/guanyin-flyway:${version}" .
+    docker build --target webapp -t "oicrgsi/guanyin:${version}" .
+
+To run, different environment variables are needed for each container. For the
+migration container, set the [Flyway environment
+variables](https://flywaydb.org/documentation/envvars) to connect to your
+database. For the webapp container, set `DB_CONNECTION` to point to the
+PostgreSQL database.
