@@ -14,15 +14,9 @@ ignore:
     - express-joi-validator > boom > hoek:
         reason: no better option available
         expires: '2018-05-26T18:23:20.760Z'
-      joi > hoek:
-        reason: joi 6 required for express-joi-validator
-        expires: '2018-08-03T14:01:17.160Z'
     - express-joi-validator > joi > hoek:
         reason: no better option available
         expires: '2018-05-26T18:23:20.760Z'
-      joi > topo > hoek:
-        reason: joi 6 required for express-joi-validator
-        expires: '2018-08-03T14:01:17.160Z'
     - express-joi-validator > joi > topo > hoek:
         reason: no better option available
         expires: '2018-05-26T18:23:20.760Z'
@@ -32,6 +26,12 @@ ignore:
     - joi > topo > hoek:
         reason: Unfortunately express-joi-validator requires joi@6 to be co-installed
         expires: '2018-06-01T19:58:16.217Z'
+    - joi > hoek:
+        reason: joi 6 required for express-joi-validator
+        expires: '2018-08-03T14:01:17.160Z'
+    - joi > topo > hoek:
+        reason: joi 6 required for express-joi-validator
+        expires: '2018-08-03T14:01:17.160Z'
 # patches apply the minimum changes required to fix a vulnerability
 patch:
   'npm:uglify-js:20150824':
