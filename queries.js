@@ -28,6 +28,7 @@ function parseShesmuType(type) {
         rest: type.substring(1)
       };
     case 's':
+    case 'p': // This is intentional; paths are still strings
       return {
         check: value => typeof value === 'string',
         compare: (a, b) => a.localeCompare(b),
