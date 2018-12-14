@@ -19,7 +19,6 @@ install:
   - rm node_modules/.bin/flyway || true # don't error if the symlink doesn't exist
   - cd node_modules/.bin && ln -s ../flyway/lib/flyway-5.0.7/flyway flyway && cd -
   - ls -lh node_modules/.bin 
-  - npm install -g snyk@1.117.1
 
 before_script:
   - psql -c "create user test with password 'test' createdb;" -U postgres
@@ -29,7 +28,6 @@ before_script:
   - mkdir logs
   
 script:
-    - snyk test
     - npm run test
     - npm run lint
 
