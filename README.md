@@ -8,6 +8,7 @@ One Who] Perceives the Sounds of the World". (from https://en.wikipedia.org/wiki
     Node v4.x or higher  (developed on 8.9.1)
     NPM (comes with Node)
     PostgreSQL 9.5 or higher (developed on 10.1)
+    Docker (if using for database migrations)
 
 Checking for node:
 
@@ -37,13 +38,9 @@ Create a .env file and populate it. The .env-example file provides a template fo
     $ psql postgres -U postgres
 
     # create database ${DATABASE};
-
     # create user ${USER};
-
     # alter role ${USER} with password '${PASSWORD}';
-
     # grant all on database ${DATABASE} to ${USER};
-
     # \q
 
 
@@ -51,20 +48,26 @@ Create a .env file and populate it. The .env-example file provides a template fo
 
 When setting up the database for the first time:
 
-    Create a file in conf/ called flyway.conf. The conf/example-flyway.conf file provides a template for this.
-    
-    Perform the initial migration using the following:
-        $ npm run fw:clean
-        $ npm run fw:migrate
-        
-After that initial setup, run migrations as necessary using:
+Create a file in conf/ called flyway.conf. The conf/example-flyway.conf file provides a template for this.
 
-	$ npm run fw:migrate
+Pull in the Flyway Docker image:
+   $ docker pull boxfuse/flyway
+    
+Perform the initial migration using the following:
+   $ docker run --rm -v $(pwd)/conf:/flyway/conf -v $(pwd)/sql:/flyway/sql --network=host boxfuse/flyway migrate
+
+After that initial setup, run migrations as necessary using the same command.
+
+If the database needs to be wiped clean and reset, this can be done using:
+   $ docker run --rm -v $(pwd)/conf:/flyway/conf -v $(pwd)/sql:/flyway/sql --network=host boxfuse/flyway clean
+   $ docker run --rm -v $(pwd)/conf:/flyway/conf -v $(pwd)/sql:/flyway/sql --network=host boxfuse/flyway migrate
+
+Note that the argument `--network=host` is particularly important if `flyway.url` includes `localhost`.
 
 ## Running the application
 
-	$ npm run start
+   $ npm run start
 
 ## Running the test
 
-       $ npm run test
+   $ npm run test
