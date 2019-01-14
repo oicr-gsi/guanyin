@@ -6,10 +6,9 @@
     "start": "node ./bin/www",
     "start:dev": "nodemon ./bin/www",
     "start:prod": "NODE_ENV=production nodejs --abort-on-uncaught-exception ./bin/www",
-    "fw:clean": "flyway -X -configFiles=conf/flyway.conf clean",
-    "fw:migrate": "flyway -X -configFiles=conf/flyway.conf -locations=filesystem:./sql/ migrate",
-    "fw:test-clean": "flyway -X -configFiles=conf/flyway-test.conf clean",
-    "fw:test-migrate": "flyway -X -configFiles=conf/flyway-test.conf -locations=filesystem:./sql/,filesystem:./test/sql/ migrate",
+    "fw:clean": "docker run --rm -v $(pwd)/conf:/flyway/conf -v $(pwd)/sql:/flyway/sql --network=host boxfuse/flyway clean",
+    "fw:migrate": "docker run --rm -v $(pwd)/conf:/flyway/conf -v $(pwd)/sql:/flyway/sql --network=host boxfuse/flyway migrate",
+    "pretest": ". test/setup_test_db.sh",
     "test": "PORT=8083 DB_CONNECTION=postgres://test:test@localhost:5432/test_report_db mocha --exit",
     "lint": "eslint .",
     "precommit": "lint-staged"

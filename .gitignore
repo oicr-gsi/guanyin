@@ -1,5 +1,6 @@
 # Flyway database migration credentials file
 conf/flyway.conf
+test/flyway.conf
 # environment variables file
 .env
 # node modules (they'll all be unpacked with npm install anyway)
