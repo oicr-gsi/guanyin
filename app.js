@@ -126,7 +126,7 @@ app.use(function(err, req, res, next) {
     } else {
       // unexpected error, so log it
       logger.debug(err);
-      logger.debug({ url: req.originalUrl, message: err.message });
+      logger.error({ url: req.originalUrl, message: err.message });
       res.status(500).json({
         status: 'error',
         message: app.get('env') === 'production' ? 'system error' : err //return err only in development env.
@@ -134,6 +134,7 @@ app.use(function(err, req, res, next) {
     }
   } else {
     logger.debug(err);
+    logger.error({ url: req.originalUrl, message: err.message });
     res.status(err.status).json({
       status: 'error',
       message: err.message
