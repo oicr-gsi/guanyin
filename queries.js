@@ -117,7 +117,8 @@ function parseShesmuType(type) {
               Object.keys(value).length == fields.length &&
               fields.every(
                 field =>
-                  value[field.name] && field.type.check(value[field.name])
+                  value.hasOwnProperty(field.name) &&
+                  field.type.check(value[field.name])
               ),
             compare: (a, b) =>
               fields.reduce(
