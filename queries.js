@@ -1,12 +1,12 @@
-var promise = require('bluebird');
+const promise = require('bluebird');
 
-var options = {
+const options = {
   // Initialization Options
   promiseLib: promise
 };
 
-var pgp = require('pg-promise')(options);
-var db = pgp(process.env.DB_CONNECTION);
+const pgp = require('pg-promise')(options);
+const db = pgp(process.env.DB_CONNECTION);
 
 /**
  * Parse a Shesmu type signature and return an object that can check and sort values.
@@ -146,41 +146,43 @@ function parseShesmuType(type) {
   }
 }
 
+/** set up custom error if bad params are given */
+function ValidationError(message) {
+  this.name = 'ValidationError';
+  this.message = message || '';
+}
+ValidationError.prototype = Error.prototype;
+
 /**
  * validate parameters against permitted parameters
  */
-function validateParameters(req, res, permitted_parameters) {
-  var permittedNames = Object.keys(permitted_parameters);
-  for (var nameIndex = 0; nameIndex < permittedNames.length; nameIndex++) {
-    var name = permittedNames[nameIndex];
+function throwIfHasInvalidParams(req, permitted_parameters) {
+  const permittedNames = Object.keys(permitted_parameters);
+  for (let nameIndex = 0; nameIndex < permittedNames.length; nameIndex++) {
+    const name = permittedNames[nameIndex];
     if (req.body.parameters.hasOwnProperty(name)) {
       let type = parseShesmuType(permitted_parameters[name].type);
       if (!type.check(req.body.parameters[name])) {
-        res
-          .status(400)
-          .send(
-            'Invalid value for parameter ' +
-              name +
-              '. Expected type ' +
-              permitted_parameters[name].type +
-              '.'
-          );
-        return 0;
+        throw new ValidationError(
+          'Invalid value for parameter ' +
+            name +
+            '. Expected type ' +
+            permitted_parameters[name].type +
+            '.'
+        );
       }
       req.body.parameters[name] = type.canonicalise(req.body.parameters[name]);
     } else if (permitted_parameters[name].required) {
-      res
-        .status(400)
-        .send('Report requires ' + name + ', but paramter not supplied.');
-      return 0;
+      throw new ValidationError(
+        'Report requires ' + name + ', but it was not supplied.'
+      );
     }
   }
-  var providedNames = Object.keys(req.body.parameters);
-  for (nameIndex = 0; nameIndex < providedNames.length; nameIndex++) {
-    name = providedNames[nameIndex];
+  const providedNames = Object.keys(req.body.parameters);
+  for (let nameIndex = 0; nameIndex < providedNames.length; nameIndex++) {
+    const name = providedNames[nameIndex];
     if (!permitted_parameters.hasOwnProperty(name)) {
-      res.status(400).send('Invalid parameter ' + name + ' provided.');
-      return 0;
+      throw new ValidationError('Invalid parameter ' + name + ' provided.');
     }
   }
   return 1;
@@ -188,249 +190,206 @@ function validateParameters(req, res, permitted_parameters) {
 
 // add query functions
 
-function getAllReports(req, res, next) {
-  db
-    .any('select * from report')
-    .then(function(data) {
-      res.status(200).json(data);
-    })
-    .catch(function(err) {
-      return next(err);
-    });
-}
-
-function getSingleReport(req, res, next) {
-  var reportID = parseInt(req.params.id);
-  db
-    .one('select * from report where report_id = $1', reportID)
-    .then(function(data) {
-      res.status(200).json(data);
-    })
-    .catch(function(err) {
-      return next(err);
-    });
-}
-
-function getAllreports_by_name(req, res, next) {
-  var name = req.query.name;
-  db
-    .any('select * from report where name = $1', name)
-    .then(function(data) {
-      res.status(200).json(data);
-    })
-    .catch(function(err) {
-      return next(err);
-    });
-}
-
-function createReport(req, res, next) {
-  if (!req.body.hasOwnProperty('lims_entity')) {
-    // property may be null if it is not associated with a LIMS entity (Project, Library, Run, Pool)
-    req.body.lims_entity = null;
+async function getAllReports(req, res, next) {
+  try {
+    const reports = await db.any('select * from report');
+    return res.status(200).json(reports);
+  } catch (err) {
+    return next(err);
   }
-  if (
-    !Object.values(req.body.permitted_parameters).every(p => {
-      const type = parseShesmuType(p.type);
-      return type != null && type.rest === '';
-    })
-  ) {
-    res.status(400).send('Invalid type signature on parameter.');
+}
+
+async function getSingleReport(req, res, next) {
+  try {
+    const report = await getReportById(req.params.id);
+    return res.status(200).json(report);
+  } catch (err) {
+    return next(err);
   }
-  db
-    .one(
+}
+
+async function getAllreports_by_name(req, res, next) {
+  try {
+    const reports = await db.any(
+      'select * from report where name = $1',
+      req.query.name
+    );
+    return res.status(200).json(reports);
+  } catch (err) {
+    return next(err);
+  }
+}
+
+function checkTypeDefinitionValidity(parameters) {
+  return Object.values(parameters).every(p => {
+    const type = parseShesmuType(p.type);
+    return type != null && type.rest === '';
+  });
+}
+
+async function createReport(req, res, next) {
+  try {
+    if (!req.body.hasOwnProperty('lims_entity')) {
+      // property may be null if it is not associated with a LIMS entity (Project, Library, Run, Pool)
+      req.body.lims_entity = null;
+    }
+    if (!checkTypeDefinitionValidity(req.body.permitted_parameters)) {
+      throw new ValidationError('Invalid type signature on parameter.');
+    }
+    const insert = await db.one(
       'insert into report(name, version, category, permitted_parameters, lims_entity)' +
         'values(${name}, ${version}, ${category}, ${permitted_parameters}, ${lims_entity})' +
         'returning report_id',
       req.body
-    )
-    .then(function(data) {
-      res.status(200).json(data);
-    })
-    .catch(function(err) {
-      return next(err);
-    });
+    );
+    return res.status(201).json(insert);
+  } catch (err) {
+    return next(err);
+  }
 }
 
-function getAllReportrecords(req, res, next) {
-  db
-    .any('select * from report_record')
-    .then(function(data) {
-      res.status(200).json(data);
-    })
-    .catch(function(err) {
-      return next(err);
-    });
+async function getAllReportrecords(req, res, next) {
+  try {
+    const records = await db.any('select * from report_record');
+    return res.status(200).json(records);
+  } catch (err) {
+    return next(err);
+  }
 }
 
-function getAllreportrecords_by_notification_done(req, res, next) {
-  var done = req.query.notification_done;
-  db
-    .any('select * from report_record where notification_done = $1', done)
-    .then(function(data) {
-      res.status(200).json(data);
-    })
-    .catch(function(err) {
-      return next(err);
-    });
+async function getAllreportrecords_by_notification_done(req, res, next) {
+  try {
+    const records = await db.any(
+      'select * from report_record where notification_done = $1',
+      req.query.notification_done
+    );
+    return res.status(200).json(records);
+  } catch (err) {
+    return next(err);
+  }
 }
 
-function getSingleReportrecord(req, res, next) {
-  var report_record_ID = parseInt(req.params.id);
-  db
-    .one(
+async function getSingleReportrecord(req, res, next) {
+  try {
+    const record = await db.one(
       'select * from report_record where report_record_id = $1',
-      report_record_ID
-    )
-    .then(function(data) {
-      res.status(200).json(data);
-    })
-    .catch(function(err) {
-      return next(err);
-    });
+      parseInt(req.params.id)
+    );
+    return res.status(200).json(record);
+  } catch (err) {
+    return next(err);
+  }
 }
 
-function createReportrecord(req, res, next) {
-  var reportID = parseInt(req.body.report_id);
-  req.body.report_id = reportID;
-  db
-    .one('select * from report where report_id = $1', reportID)
-    .then(function(report) {
-      var permitted_parameters = report.permitted_parameters;
-      if (!validateParameters(req, res, permitted_parameters)) {
-        return;
-      }
-      db
-        .one(
-          'insert into report_record(report_id, finished, date_generated, freshest_input_date, files_in, report_path, notification_targets, notification_message, parameters)' +
-            'values(${report_id}, true, ${date_generated}, ${freshest_input_date}, ${files_in}, ${report_path}, ${notification_targets}, ${notification_message}, ${parameters})' +
-            'returning report_record_id',
-          req.body
-        )
-        .then(function(data) {
-          res.status(200).json(data);
-        })
-        .catch(function(err) {
-          return next(err);
-        });
-    })
-    .catch(function(err) {
-      return next(err);
-    });
+async function createReportrecord(req, res, next) {
+  try {
+    const reportID = parseInt(req.body.report_id);
+    req.body.report_id = reportID;
+    const report = await getReportById(reportID);
+    confirmReportParametersAreValid(req, report, reportID);
+    const insert = await db.one(
+      'insert into report_record(report_id, finished, date_generated, freshest_input_date, files_in, report_path, notification_targets, notification_message, parameters)' +
+        'values(${report_id}, true, ${date_generated}, ${freshest_input_date}, ${files_in}, ${report_path}, ${notification_targets}, ${notification_message}, ${parameters})' +
+        'returning report_record_id',
+      req.body
+    );
+    return res.status(201).json(insert);
+  } catch (err) {
+    return next(err);
+  }
 }
 
-function createReportrecordStart(req, res, next) {
-  var reportID = parseInt(req.query.report);
-  req.body.report_id = reportID;
-  db
-    .one('select * from report where report_id = $1', reportID)
-    .then(function(report) {
-      var permitted_parameters = report.permitted_parameters;
-      if (!validateParameters(req, res, permitted_parameters)) {
-        return;
-      }
-      db
-        .one(
-          'insert into report_record(report_id, finished, date_generated, parameters)' +
-            'values(${report_id}, false, NOW(), ${parameters})' +
-            'returning report_record_id',
-          req.body
-        )
-        .then(function(data) {
-          res.status(200).json(data);
-        })
-        .catch(function(err) {
-          return next(err);
-        });
-    })
-    .catch(function(err) {
-      return next(err);
-    });
+async function getReportById(reportID) {
+  return await db.one('select * from report where report_id = $1', reportID);
 }
 
-function patchReportrecord(req, res, next) {
-  req.body.report_record_id = parseInt(req.params.id);
-  db
-    .one(
+function confirmReportParametersAreValid(req, report, reportID) {
+  if (report == null)
+    throw new ValidationError('Could not find report for ID ' + reportID);
+  throwIfHasInvalidParams(req, report.permitted_parameters);
+}
+
+async function createReportrecordStart(req, res, next) {
+  try {
+    const reportID = parseInt(req.query.report);
+    req.body.report_id = reportID;
+    const report = await getReportById(reportID);
+    confirmReportParametersAreValid(req, report, reportID);
+    const insert = await db.one(
+      'insert into report_record(report_id, finished, date_generated, parameters)' +
+        'values(${report_id}, false, NOW(), ${parameters})' +
+        'returning report_record_id',
+      req.body
+    );
+    return res.status(201).json(insert);
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function patchReportrecord(req, res, next) {
+  try {
+    req.body.report_record_id = parseInt(req.params.id);
+    await db.one(
       'update report_record set finished=true, freshest_input_date=${freshest_input_date}, files_in=${files_in}, report_path=${report_path}, notification_targets=${notification_targets}, notification_message=${notification_message} where report_record_id=${report_record_id} and finished=false returning report_record_id',
       req.body
-    )
-    .then(function() {
-      res.status(200).json({
-        status: 'success',
-        message: 'Updated report record'
-      });
-    })
-    .catch(function(err) {
-      return next(err);
+    );
+    return res.status(200).json({
+      status: 'success',
+      message: 'Updated report record'
     });
+  } catch (err) {
+    return next(err);
+  }
 }
 
-function updateReportrecord_notification_done(req, res, next) {
-  db
-    .one(
+async function updateReportrecord_notification_done(req, res, next) {
+  try {
+    await db.one(
       'update report_record set notification_done=true where report_record_id=$1 returning report_record_id',
       [parseInt(req.params.id)]
-    )
-    .then(function() {
-      res.status(200).json({
-        status: 'success',
-        message: 'Updated report record'
-      });
-    })
-    .catch(function(err) {
-      return next(err);
+    );
+    return res.status(200).json({
+      status: 'success',
+      message: 'Updated report record'
     });
+  } catch (err) {
+    return next(err);
+  }
 }
 
-function findReportrecord_files_in(req, res, next) {
-  db
-    .any(
+async function findReportrecord_files_in(req, res, next) {
+  try {
+    const record = await db.any(
       'select rr.* from report_record rr, report r  where r.report_id=rr.report_id and r.name = $1 and r.version = $2 and rr.files_in= $3',
       [req.query.name, req.query.version, req.body.files_in]
-    )
-    .then(function(data) {
-      res.status(200).json(data);
-    })
-    .catch(function(err) {
-      return next(err);
-    });
+    );
+    return res.status(200).json(record);
+  } catch (err) {
+    return next(err);
+  }
 }
 
-function findReportrecord_parameters(req, res, next) {
-  let promise;
-  if (req.query.hasOwnProperty('report')) {
-    promise = db.one('select * from report where report_id = $1', [
-      parseInt(req.query.report)
-    ]);
-  } else {
-    promise = db.one('select * from report where name = $1 and version = $2', [
-      req.query.name,
-      req.query.version
-    ]);
+async function findReportrecord_parameters(req, res, next) {
+  try {
+    let report;
+    if (req.query.hasOwnProperty('report')) {
+      report = await getReportById(parseInt(req.query.report));
+    } else {
+      report = await db.one(
+        'select * from report where name = $1 and version = $2',
+        [req.query.name, req.query.version]
+      );
+    }
+    confirmReportParametersAreValid(req, report, report.report_id);
+    const record = await db.any(
+      'select rr.* from report_record rr where rr.report_id=$1 and rr.parameters= $2',
+      [report.report_id, req.body.parameters]
+    );
+    return res.status(200).json(record);
+  } catch (err) {
+    return next(err);
   }
-
-  promise
-    .then(function(report) {
-      var reportID = report.report_id;
-      var permitted_parameters = report.permitted_parameters;
-      if (!validateParameters(req, res, permitted_parameters)) {
-        return;
-      }
-      db
-        .any(
-          'select rr.* from report_record rr where rr.report_id=$1 and rr.parameters= $2',
-          [reportID, req.body.parameters]
-        )
-        .then(function(data) {
-          res.status(200).json(data);
-        })
-        .catch(function(err) {
-          return next(err);
-        });
-    })
-    .catch(function(err) {
-      return next(err);
-    });
 }
 
 module.exports = {
