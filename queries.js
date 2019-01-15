@@ -155,7 +155,7 @@ ValidationError.prototype = Error.prototype;
 /**
  * validate parameters against permitted parameters
  */
-function throwIfHasInvalidParams(req, res, permitted_parameters) {
+function throwIfHasInvalidParams(req, permitted_parameters) {
   const permittedNames = Object.keys(permitted_parameters);
   for (let nameIndex = 0; nameIndex < permittedNames.length; nameIndex++) {
     const name = permittedNames[nameIndex];
@@ -219,7 +219,7 @@ async function getAllreports_by_name(req, res, next) {
   }
 }
 
-function checkTypeValidity(parameters) {
+function checkTypeDefinitionValidity(parameters) {
   return Object.values(parameters).every(p => {
     const type = parseShesmuType(p.type);
     return type != null && type.rest === '';
@@ -232,7 +232,7 @@ async function createReport(req, res, next) {
       // property may be null if it is not associated with a LIMS entity (Project, Library, Run, Pool)
       req.body.lims_entity = null;
     }
-    if (!checkTypeValidity(req.body.permitted_parameters)) {
+    if (!checkTypeDefinitionValidity(req.body.permitted_parameters)) {
       throw new ValidationError('Invalid type signature on parameter.');
     }
     const insert = await db.one(
@@ -285,7 +285,7 @@ async function createReportrecord(req, res, next) {
     const reportID = parseInt(req.body.report_id);
     req.body.report_id = reportID;
     const report = await getReportById(reportID);
-    confirmReportParametersAreValid(req, res, report, reportID);
+    confirmReportParametersAreValid(req, report, reportID);
     const insert = await db.one(
       'insert into report_record(report_id, finished, date_generated, freshest_input_date, files_in, report_path, notification_targets, notification_message, parameters)' +
         'values(${report_id}, true, ${date_generated}, ${freshest_input_date}, ${files_in}, ${report_path}, ${notification_targets}, ${notification_message}, ${parameters})' +
@@ -302,10 +302,10 @@ async function getReportById(reportID) {
   return await db.one('select * from report where report_id = $1', reportID);
 }
 
-function confirmReportParametersAreValid(req, res, report, reportID) {
+function confirmReportParametersAreValid(req, report, reportID) {
   if (report == null)
     throw new ValidationError('Could not find report for ID ' + reportID);
-  throwIfHasInvalidParams(req, res, report.permitted_parameters);
+  throwIfHasInvalidParams(req, report.permitted_parameters);
 }
 
 async function createReportrecordStart(req, res, next) {
@@ -313,7 +313,7 @@ async function createReportrecordStart(req, res, next) {
     const reportID = parseInt(req.query.report);
     req.body.report_id = reportID;
     const report = await getReportById(reportID);
-    confirmReportParametersAreValid(req, res, report, reportID);
+    confirmReportParametersAreValid(req, report, reportID);
     const insert = await db.one(
       'insert into report_record(report_id, finished, date_generated, parameters)' +
         'values(${report_id}, false, NOW(), ${parameters})' +
@@ -380,7 +380,7 @@ async function findReportrecord_parameters(req, res, next) {
         [req.query.name, req.query.version]
       );
     }
-    confirmReportParametersAreValid(req, res, report, report.report_id);
+    confirmReportParametersAreValid(req, report, report.report_id);
     const record = await db.any(
       'select rr.* from report_record rr where rr.report_id=$1 and rr.parameters= $2',
       [report.report_id, req.body.parameters]
