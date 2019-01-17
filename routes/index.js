@@ -247,7 +247,7 @@ router.get(
  *         schema:
  *           $ref: '#/definitions/report'
  *     responses:
- *       200:
+ *       201:
  *         description: Successfully created
  *         schema:
  *           type: object
@@ -376,7 +376,7 @@ router.get(
  *         schema:
  *           $ref: '#/definitions/report_record_start'
  *     responses:
- *       200:
+ *       201:
  *         description: Successfully created
  *         schema:
  *           type: object
@@ -433,7 +433,7 @@ router.post(
  *         schema:
  *           $ref: '#/definitions/report_record_start'
  *     responses:
- *       200:
+ *       201:
  *         description: Successfully created
  *         schema:
  *           type: object
