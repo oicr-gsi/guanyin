@@ -113,6 +113,9 @@ const expressJoi = require('../utils/express-joi-validator');
  *       notification_message:
  *         type: string
  *         description: The message sent out to the notification targets
+ *       parameters:
+ *         type: object
+ *         description: The json object. The parameters used when generating the report. It complies with the permitted parameter json schema.
  *   report_record_complete:
  *     properties:
  *       report_record_id:
