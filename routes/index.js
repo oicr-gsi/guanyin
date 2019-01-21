@@ -43,6 +43,34 @@ const expressJoi = require('../utils/express-joi-validator');
  *         required: false
  *         description: indicates which LIMS entity (if any) is associated with the report
  *         enum: [Project, Library, Pool, Run]
+ *   report_record_post:
+ *     properties:
+ *       report_id:
+ *         type: integer
+ *         description: ID of the report that is being recorded
+ *       date_generated:
+ *         type: string
+ *         format: date-time
+ *         description: The date when the report was generated
+ *       freshest_input_date:
+ *         type: string
+ *         format: date-time
+ *         description: The last modified date of the newest file
+ *       files_in:
+ *         type: array
+ *         description: The list of input file paths which generated the report. The array should be sorted.
+ *       report_path:
+ *         type: string
+ *         description: The report file path
+ *       notification_targets:
+ *         type: object
+ *         description: The json object. The targets such as email and Slack that receive the notice about the report
+ *       notification_message:
+ *         type: string
+ *         description: The message sent out to the notification targets
+ *       parameters:
+ *         type: object
+ *         description: The json object. The parameters used when generating the report. It complies with the permitted parameter json schema. *
  *   report_record_start:
  *     properties:
  *       date_generated:
@@ -70,16 +98,12 @@ const expressJoi = require('../utils/express-joi-validator');
  *         description: The json object. The parameters used when generating the report. It complies with the permitted parameter json schema. *
  *   report_record_patch:
  *     properties:
- *       report_record_id:
- *         type: integer
- *         description: The report record ID
- *         readOnly: true
- *       report_id:
- *         type: integer
- *         description: The report ID
  *       files_in:
  *         type: array
  *         description: The list of input file paths which generated the report. The array should be sorted.
+ *       freshest_input_date:
+ *         type: string
+ *         description: The most recent modification time of the report's inputs.
  *       report_path:
  *         type: string
  *         description: The report file path
@@ -89,9 +113,6 @@ const expressJoi = require('../utils/express-joi-validator');
  *       notification_message:
  *         type: string
  *         description: The message sent out to the notification targets
- *       notification_done:
- *         type: boolean
- *         description: The report has been notified or not
  *       parameters:
  *         type: object
  *         description: The json object. The parameters used when generating the report. It complies with the permitted parameter json schema.
@@ -374,7 +395,7 @@ router.get(
  *         in: body
  *         required: true
  *         schema:
- *           $ref: '#/definitions/report_record_start'
+ *           $ref: '#/definitions/report_record_post'
  *     responses:
  *       201:
  *         description: Successfully created
@@ -464,8 +485,13 @@ router.post(
  *     produces:
  *       - application/json
  *     parameters:
+ *       - name: report_record_id
+ *         description: ID of the report record to update
+ *         in: path
+ *         required: true
+ *         type: integer
  *       - name: report_record
- *         description: report record object
+ *         description: report record data to add or update
  *         in: body
  *         required: true
  *         schema:
@@ -478,6 +504,9 @@ router.post(
  */
 
 const bodySchema_record_patch = {
+  params: {
+    id: Joi.number().required()
+  },
   body: {
     freshest_input_date: Joi.date(),
     files_in: Joi.array().items(Joi.string().required()),
@@ -486,8 +515,7 @@ const bodySchema_record_patch = {
       email: Joi.array().items(Joi.string().email()),
       slack: Joi.array().items(Joi.string())
     }),
-    notification_message: Joi.string().allow(''),
-    notification_done: Joi.boolean()
+    notification_message: Joi.string().allow('')
   }
 };
 router.patch(
