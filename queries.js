@@ -204,6 +204,7 @@ async function getSingleReport(req, res, next) {
     const report = await getReportById(req.params.id);
     return res.status(200).json(report);
   } catch (err) {
+    returnIfNotFound(err, res, 'report');
     return next(err);
   }
 }
@@ -277,6 +278,7 @@ async function getSingleReportrecord(req, res, next) {
     );
     return res.status(200).json(record);
   } catch (err) {
+    returnIfNotFound(err, res, 'report record');
     return next(err);
   }
 }
@@ -295,6 +297,7 @@ async function createReportrecord(req, res, next) {
     );
     return res.status(201).json(insert);
   } catch (err) {
+    returnIfNotFound(err, res, 'report'); // only getReportById will throw a not found error
     return next(err);
   }
 }
@@ -339,6 +342,7 @@ async function patchReportrecord(req, res, next) {
       message: 'Updated report record'
     });
   } catch (err) {
+    returnIfNotFound(err, res, 'unfinished report record');
     return next(err);
   }
 }
@@ -354,6 +358,7 @@ async function updateReportrecord_notification_done(req, res, next) {
       message: 'Updated report record'
     });
   } catch (err) {
+    returnIfNotFound(err, res, 'report record');
     return next(err);
   }
 }
@@ -381,6 +386,9 @@ async function findReportrecord_parameters(req, res, next) {
         [req.query.name, req.query.version]
       );
     }
+    if (report == null || report.report_id == null) {
+      send404(res, 'report');
+    }
     confirmReportParametersAreValid(req, report, report.report_id);
     const record = await db.any(
       'select rr.* from report_record rr where rr.report_id=$1 and rr.parameters= $2',
@@ -388,8 +396,23 @@ async function findReportrecord_parameters(req, res, next) {
     );
     return res.status(200).json(record);
   } catch (err) {
+    returnIfNotFound(err, res, 'report record');
     return next(err);
   }
+}
+
+/** Catches errors thrown by `db.one` calls which returned no items */
+function returnIfNotFound(err, res, itemName) {
+  if (err.result != null && err.result.rowCount == 0) {
+    send404(res, itemName);
+  }
+}
+
+function send404(res, itemName) {
+  return res.status(404).json({
+    status: 'not found',
+    message: `The ${itemName} you requested could not be found`
+  });
 }
 
 module.exports = {

@@ -113,9 +113,6 @@ const expressJoi = require('../utils/express-joi-validator');
  *       notification_message:
  *         type: string
  *         description: The message sent out to the notification targets
- *       parameters:
- *         type: object
- *         description: The json object. The parameters used when generating the report. It complies with the permitted parameter json schema.
  *   report_record_complete:
  *     properties:
  *       report_record_id:
@@ -477,7 +474,7 @@ router.post(
 
 /**
  * @swagger
- * /reportdb/record/{id}:
+ * /reportdb/record/{report_record_id}:
  *   patch:
  *     tags:
  *       - report_record
@@ -501,6 +498,8 @@ router.post(
  *         description: Successfully update
  *         schema:
  *           $ref: '#/definitions/report_record_complete'
+ *       404:
+ *         description: No unfinished report record found for given report_record_id.
  */
 
 const bodySchema_record_patch = {
