@@ -576,6 +576,11 @@ router.put(
  *         description: the list of input files which generate the report
  *         in: body
  *         required: true
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: string
+ *
  *     responses:
  *       200:
  *         description: A list of report records with the given report name, version and files_in
