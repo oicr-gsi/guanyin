@@ -174,7 +174,7 @@ function throwIfHasInvalidParams(req, permitted_parameters) {
       req.body.parameters[name] = type.canonicalise(req.body.parameters[name]);
     } else if (permitted_parameters[name].required) {
       throw new ValidationError(
-        'Report requires ' + name + ', but it was not supplied.'
+        'Report requires parameter "' + name + '", but it was not supplied.'
       );
     }
   }
@@ -182,7 +182,7 @@ function throwIfHasInvalidParams(req, permitted_parameters) {
   for (let nameIndex = 0; nameIndex < providedNames.length; nameIndex++) {
     const name = providedNames[nameIndex];
     if (!permitted_parameters.hasOwnProperty(name)) {
-      throw new ValidationError('Invalid parameter ' + name + ' provided.');
+      throw new ValidationError('Invalid parameter "' + name + '" provided.');
     }
   }
   return 1;
@@ -309,12 +309,16 @@ async function getReportById(reportID) {
 function confirmReportParametersAreValid(req, report, reportID) {
   if (report == null)
     throw new ValidationError('Could not find report for ID ' + reportID);
+  if (req.body == null || !req.body.hasOwnProperty('parameters'))
+    throw new ValidationError(
+      'Could not validate parameters because no "parameters" object was provided'
+    );
   throwIfHasInvalidParams(req, report.permitted_parameters);
 }
 
 async function createReportrecordStart(req, res, next) {
   try {
-    const reportID = parseInt(req.query.report);
+    const reportID = parseInt(req.query.report_id);
     req.body.report_id = reportID;
     const report = await getReportById(reportID);
     confirmReportParametersAreValid(req, report, reportID);
@@ -376,6 +380,8 @@ async function findReportrecord_files_in(req, res, next) {
 }
 
 async function findReportrecord_parameters(req, res, next) {
+  if (!req.body.hasOwnProperty('parameters'))
+    throw new ValidationError('Parameters must be provided');
   try {
     let report;
     if (req.query.hasOwnProperty('report')) {

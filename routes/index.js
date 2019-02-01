@@ -73,26 +73,6 @@ const expressJoi = require('../utils/express-joi-validator');
  *         description: The json object. The parameters used when generating the report. It complies with the permitted parameter json schema. *
  *   report_record_start:
  *     properties:
- *       date_generated:
- *         type: string
- *         format: date-time
- *         description: The date when the report was generated
- *       freshest_input_date:
- *         type: string
- *         format: date-time
- *         description: The last modified date of the newest file
- *       files_in:
- *         type: array
- *         description: The list of input file paths which generated the report. The array should be sorted.
- *       report_path:
- *         type: string
- *         description: The report file path
- *       notification_targets:
- *         type: object
- *         description: The json object. The targets such as email and Slack that receive the notice about the report
- *       notification_message:
- *         type: string
- *         description: The message sent out to the notification targets
  *       parameters:
  *         type: object
  *         description: The json object. The parameters used when generating the report. It complies with the permitted parameter json schema. *
@@ -441,11 +421,11 @@ router.post(
  *     parameters:
  *       - name: report_id
  *         description: report ID
- *         in: path
+ *         in: query
  *         required: true
  *         type: integer
- *       - name: report_record
- *         description: report record object
+ *       - name: parameters
+ *         description: parameter used to run the report
  *         in: body
  *         required: true
  *         schema:
@@ -462,12 +442,15 @@ router.post(
  */
 
 const bodySchema_record_start = {
+  query: {
+    report_id: Joi.number().required()
+  },
   body: {
     parameters: Joi.object().pattern(/^\w+$/, Joi.any().required())
   }
 };
 router.post(
-  '/reportdb/record_start',
+  '/reportdb/record_start/',
   expressJoi(bodySchema_record_start),
   db.createReportrecordStart
 );
