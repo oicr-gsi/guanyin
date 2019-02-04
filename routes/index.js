@@ -411,7 +411,7 @@ router.post(
 
 /**
  * @swagger
- * /reportdb/record_start/{report_id}:
+ * /reportdb/record_start?report_id={report_id}:
  *   post:
  *     tags:
  *       - report_record
