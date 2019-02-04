@@ -9,6 +9,11 @@ const expressJoi = require('../utils/express-joi-validator');
 /**
  * @swagger
  * definitions:
+ *   parameters_schema:
+ *     properties:
+ *       parameters:
+ *         type: object
+ *         description: The json object. The parameters used when generating the report. It complies with the permitted parameter json schema. *
  *   report:
  *     properties:
  *       report_id:
@@ -68,11 +73,6 @@ const expressJoi = require('../utils/express-joi-validator');
  *       notification_message:
  *         type: string
  *         description: The message sent out to the notification targets
- *       parameters:
- *         type: object
- *         description: The json object. The parameters used when generating the report. It complies with the permitted parameter json schema. *
- *   report_record_start:
- *     properties:
  *       parameters:
  *         type: object
  *         description: The json object. The parameters used when generating the report. It complies with the permitted parameter json schema. *
@@ -429,7 +429,7 @@ router.post(
  *         in: body
  *         required: true
  *         schema:
- *           $ref: '#/definitions/report_record_start'
+ *           $ref: '#/definitions/parameters_schema'
  *     responses:
  *       201:
  *         description: Successfully created
@@ -596,7 +596,7 @@ router.post(
  *     produces:
  *       - application/json
  *     parameters:
- *       - name: report ID
+ *       - name: report_id
  *         description: the id of the report (as an alternative to name and version)
  *         in: query
  *         required: false
@@ -613,7 +613,7 @@ router.post(
  *         in: body
  *         required: true
  *         schema:
- *           type: object
+ *           $ref: '#/definitions/parameters_schema'
  *     responses:
  *       200:
  *         description: A list of report records with the given report name, version and parameters
@@ -623,7 +623,7 @@ router.post(
 
 const Schema_record_parameters = {
   query: {
-    report: Joi.number().optional(),
+    report_id: Joi.number().optional(),
     name: Joi.string().optional(),
     version: Joi.string().optional()
   },

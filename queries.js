@@ -380,21 +380,27 @@ async function findReportrecord_files_in(req, res, next) {
 }
 
 async function findReportrecord_parameters(req, res, next) {
-  if (!req.body.hasOwnProperty('parameters'))
+  if (!req.body.hasOwnProperty('parameters')) {
     throw new ValidationError('Parameters must be provided');
+  }
+  let report;
   try {
-    let report;
     if (req.query.hasOwnProperty('report')) {
-      report = await getReportById(parseInt(req.query.report));
+      report = await getReportById(parseInt(req.query.report_id));
     } else {
       report = await db.one(
         'select * from report where name = $1 and version = $2',
         [req.query.name, req.query.version]
       );
     }
-    if (report == null || report.report_id == null) {
-      send404(res, 'report');
-    }
+  } catch (err) {
+    returnIfNotFound(err, res, 'report');
+    return next(err);
+  }
+  if (report == null || report.report_id == null) {
+    send404(res, 'report');
+  }
+  try {
     confirmReportParametersAreValid(req, report, report.report_id);
     const record = await db.any(
       'select rr.* from report_record rr where rr.report_id=$1 and rr.parameters= $2',
