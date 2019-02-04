@@ -123,6 +123,11 @@ app.use(function(err, req, res, next) {
       res
         .status(err.output.statusCode)
         .json({ message: err.data[0].message, path: err.data[0].path });
+    } else if (err.name == 'ValidationError') {
+      res.status(400).json({
+        status: 'error',
+        message: err.message
+      });
     } else {
       // unexpected error, so log it
       logger.debug(err);

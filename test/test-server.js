@@ -169,6 +169,39 @@ describe('report_record', function() {
       });
   });
 
+  it('should add a single minimal report record on /reportdb/record_start/{report_id} POST', done => {
+    chai
+      .request(server)
+      .post('/reportdb/record_start?report_id=1')
+      .send({
+        parameters: {
+          runName: '180909_D00335_0267_ACB5BQAFXX',
+          instrument: 'HiSeq'
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(201);
+        res.should.be.json;
+        res.body.should.be.a('object');
+        res.body.should.have.property('report_record_id');
+        done();
+      });
+  });
+
+  it('should FAIL to add a single minimal report record on /reportdb/record_start/{report_id} POST when parameters are not provided', done => {
+    chai
+      .request(server)
+      .post('/reportdb/record_start?report_id=1')
+      .send({})
+      .end((err, res) => {
+        res.should.have.status(400);
+        res.should.be.json;
+        res.body.should.be.a('object');
+        res.body.should.have.property('message');
+        done();
+      });
+  });
+
   it('should add a SINGLE report record on /reportdb/record POST', function(done) {
     chai
       .request(server)
@@ -202,7 +235,7 @@ describe('report_record', function() {
       });
   });
 
-  it('should update a SINGLE report record on /reportdb/record{report_record_id}/notification PUT', function(done) {
+  it('should update a SINGLE report record on /reportdb/record/{report_record_id}/notification PUT', function(done) {
     chai
       .request(server)
       .put('/reportdb/record/1/notification')
