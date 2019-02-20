@@ -588,15 +588,15 @@ router.post(
 
 /**
  * @swagger
- * /reportdb/record_parameters?name={name}&version={version}:
+ * /reportdb/record_parameters?report={report_id}&name={name}&version={version}:
  *   post:
  *     tags:
  *       - report_record
- *     description: find reportrecords by the given report name, version and parameters
+ *     description: find reportrecords by the report name or version and parameters
  *     produces:
  *       - application/json
  *     parameters:
- *       - name: report_id
+ *       - name: report
  *         description: the id of the report (as an alternative to name and version)
  *         in: query
  *         required: false
@@ -623,7 +623,7 @@ router.post(
 
 const Schema_record_parameters = {
   query: {
-    report_id: Joi.number().optional(),
+    report: Joi.number().optional(),
     name: Joi.string().optional(),
     version: Joi.string().optional()
   },
