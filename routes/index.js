@@ -450,7 +450,7 @@ const bodySchema_record_start = {
   }
 };
 router.post(
-  '/reportdb/record_start/',
+  '/reportdb/record_start',
   expressJoi(bodySchema_record_start),
   db.createReportrecordStart
 );

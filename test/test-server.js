@@ -169,7 +169,7 @@ describe('report_record', function() {
       });
   });
 
-  it('should add a single minimal report record on /reportdb/record_start/{report_id} POST', done => {
+  it('should add a single minimal report record on /reportdb/record_start?report_id={report_id} POST', done => {
     chai
       .request(server)
       .post('/reportdb/record_start?report_id=1')
