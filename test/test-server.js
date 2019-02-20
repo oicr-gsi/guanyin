@@ -169,10 +169,10 @@ describe('report_record', function() {
       });
   });
 
-  it('should add a single minimal report record on /reportdb/record_start?report_id={report_id} POST', done => {
+  it('should add a single minimal report record on /reportdb/record_start?report={report_id} POST', done => {
     chai
       .request(server)
-      .post('/reportdb/record_start?report_id=1')
+      .post('/reportdb/record_start?report=1')
       .send({
         parameters: {
           runName: '180909_D00335_0267_ACB5BQAFXX',

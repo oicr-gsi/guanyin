@@ -318,7 +318,7 @@ function confirmReportParametersAreValid(req, report, reportID) {
 
 async function createReportrecordStart(req, res, next) {
   try {
-    const reportID = parseInt(req.query.report_id);
+    const reportID = parseInt(req.query.report);
     req.body.report_id = reportID;
     const report = await getReportById(reportID);
     confirmReportParametersAreValid(req, report, reportID);

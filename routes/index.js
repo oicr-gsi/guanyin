@@ -411,7 +411,7 @@ router.post(
 
 /**
  * @swagger
- * /reportdb/record_start?report_id={report_id}:
+ * /reportdb/record_start?report={report_id}:
  *   post:
  *     tags:
  *       - report_record
@@ -419,7 +419,7 @@ router.post(
  *     produces:
  *       - application/json
  *     parameters:
- *       - name: report_id
+ *       - name: report
  *         description: report ID
  *         in: query
  *         required: true
@@ -443,7 +443,7 @@ router.post(
 
 const bodySchema_record_start = {
   query: {
-    report_id: Joi.number().required()
+    report: Joi.number().required()
   },
   body: {
     parameters: Joi.object().pattern(/^\w+$/, Joi.any().required())
