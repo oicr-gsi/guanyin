@@ -385,7 +385,7 @@ async function findReportrecord_parameters(req, res, next) {
   }
   let report;
   try {
-    if (req.query.hasOwnProperty('report')) {
+    if (req.query.hasOwnProperty('report_id')) {
       report = await getReportById(parseInt(req.query.report_id));
     } else {
       report = await db.one(
