@@ -237,11 +237,12 @@ async function createReport(req, res, next) {
     if (!checkTypeDefinitionValidity(req.body.permitted_parameters)) {
       throw new ValidationError('Invalid type signature on parameter.');
     }
+    const reportData = { ...req.body };
     const insert = await db.one(
       'insert into report(name, version, category, permitted_parameters, lims_entity)' +
         'values(${name}, ${version}, ${category}, ${permitted_parameters}, ${lims_entity})' +
         'returning report_id',
-      req.body
+      reportData
     );
     return res.status(201).json(insert);
   } catch (err) {
@@ -286,14 +287,15 @@ async function getSingleReportrecord(req, res, next) {
 async function createReportrecord(req, res, next) {
   try {
     const reportID = parseInt(req.body.report_id);
-    req.body.report_id = reportID;
     const report = await getReportById(reportID);
     confirmReportParametersAreValid(req, report, reportID);
+    const recordData = { ...req.body };
+    recordData.report_id = reportID;
     const insert = await db.one(
       'insert into report_record(report_id, finished, date_generated, freshest_input_date, files_in, report_path, notification_targets, notification_message, parameters)' +
         'values(${report_id}, true, ${date_generated}, ${freshest_input_date}, ${files_in}, ${report_path}, ${notification_targets}, ${notification_message}, ${parameters})' +
         'returning report_record_id',
-      req.body
+      recordData
     );
     return res.status(201).json(insert);
   } catch (err) {
@@ -318,15 +320,16 @@ function confirmReportParametersAreValid(req, report, reportID) {
 
 async function createReportrecordStart(req, res, next) {
   try {
-    const reportID = parseInt(req.query.report_id);
-    req.body.report_id = reportID;
+    const reportID = parseInt(req.query.report);
     const report = await getReportById(reportID);
     confirmReportParametersAreValid(req, report, reportID);
+    const recordData = { ...req.body };
+    recordData.report_id = reportID;
     const insert = await db.one(
       'insert into report_record(report_id, finished, date_generated, parameters)' +
         'values(${report_id}, false, NOW(), ${parameters})' +
         'returning report_record_id',
-      req.body
+      recordData
     );
     return res.status(201).json(insert);
   } catch (err) {
@@ -336,10 +339,11 @@ async function createReportrecordStart(req, res, next) {
 
 async function patchReportrecord(req, res, next) {
   try {
-    req.body.report_record_id = parseInt(req.params.id);
+    const recordData = { ...req.body };
+    recordData.report_record_id = parseInt(req.params.id);
     await db.one(
       'update report_record set finished=true, freshest_input_date=${freshest_input_date}, files_in=${files_in}, report_path=${report_path}, notification_targets=${notification_targets}, notification_message=${notification_message} where report_record_id=${report_record_id} and finished=false returning report_record_id',
-      req.body
+      recordData
     );
     return res.status(200).json({
       status: 'success',
@@ -380,10 +384,11 @@ async function findReportrecord_files_in(req, res, next) {
 }
 
 async function findReportrecord_parameters(req, res, next) {
-  if (!req.body.hasOwnProperty('parameters'))
+  if (!req.body.hasOwnProperty('parameters')) {
     throw new ValidationError('Parameters must be provided');
+  }
+  let report;
   try {
-    let report;
     if (req.query.hasOwnProperty('report')) {
       report = await getReportById(parseInt(req.query.report));
     } else {
@@ -392,9 +397,14 @@ async function findReportrecord_parameters(req, res, next) {
         [req.query.name, req.query.version]
       );
     }
-    if (report == null || report.report_id == null) {
-      send404(res, 'report');
-    }
+  } catch (err) {
+    returnIfNotFound(err, res, 'report');
+    return next(err);
+  }
+  if (report == null || report.report_id == null) {
+    send404(res, 'report');
+  }
+  try {
     confirmReportParametersAreValid(req, report, report.report_id);
     const record = await db.any(
       'select rr.* from report_record rr where rr.report_id=$1 and rr.parameters= $2',

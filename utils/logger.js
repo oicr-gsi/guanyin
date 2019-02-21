@@ -1,7 +1,7 @@
 'use strict';
 
 const winston = require('winston');
-const logLocation = 'logs';
+const logLocation = process.env.LOG_LOCATION || 'logs';
 
 const logger = new winston.Logger({
   transports: [

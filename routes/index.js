@@ -9,6 +9,11 @@ const expressJoi = require('../utils/express-joi-validator');
 /**
  * @swagger
  * definitions:
+ *   parameters_schema:
+ *     properties:
+ *       parameters:
+ *         type: object
+ *         description: The json object. The parameters used when generating the report. It complies with the permitted parameter json schema. *
  *   report:
  *     properties:
  *       report_id:
@@ -68,11 +73,6 @@ const expressJoi = require('../utils/express-joi-validator');
  *       notification_message:
  *         type: string
  *         description: The message sent out to the notification targets
- *       parameters:
- *         type: object
- *         description: The json object. The parameters used when generating the report. It complies with the permitted parameter json schema. *
- *   report_record_start:
- *     properties:
  *       parameters:
  *         type: object
  *         description: The json object. The parameters used when generating the report. It complies with the permitted parameter json schema. *
@@ -411,7 +411,7 @@ router.post(
 
 /**
  * @swagger
- * /reportdb/record_start/{report_id}:
+ * /reportdb/record_start?report={report_id}:
  *   post:
  *     tags:
  *       - report_record
@@ -419,7 +419,7 @@ router.post(
  *     produces:
  *       - application/json
  *     parameters:
- *       - name: report_id
+ *       - name: report
  *         description: report ID
  *         in: query
  *         required: true
@@ -429,7 +429,7 @@ router.post(
  *         in: body
  *         required: true
  *         schema:
- *           $ref: '#/definitions/report_record_start'
+ *           $ref: '#/definitions/parameters_schema'
  *     responses:
  *       201:
  *         description: Successfully created
@@ -443,14 +443,14 @@ router.post(
 
 const bodySchema_record_start = {
   query: {
-    report_id: Joi.number().required()
+    report: Joi.number().required()
   },
   body: {
     parameters: Joi.object().pattern(/^\w+$/, Joi.any().required())
   }
 };
 router.post(
-  '/reportdb/record_start/',
+  '/reportdb/record_start',
   expressJoi(bodySchema_record_start),
   db.createReportrecordStart
 );
@@ -588,15 +588,15 @@ router.post(
 
 /**
  * @swagger
- * /reportdb/record_parameters?name={name}&version={version}:
+ * /reportdb/record_parameters?report={report_id}&name={name}&version={version}:
  *   post:
  *     tags:
  *       - report_record
- *     description: find reportrecords by the given report name, version and parameters
+ *     description: find reportrecords by the report name or version and parameters
  *     produces:
  *       - application/json
  *     parameters:
- *       - name: report ID
+ *       - name: report
  *         description: the id of the report (as an alternative to name and version)
  *         in: query
  *         required: false
@@ -613,7 +613,7 @@ router.post(
  *         in: body
  *         required: true
  *         schema:
- *           type: object
+ *           $ref: '#/definitions/parameters_schema'
  *     responses:
  *       200:
  *         description: A list of report records with the given report name, version and parameters

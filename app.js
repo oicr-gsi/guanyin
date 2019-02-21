@@ -118,6 +118,11 @@ app.use((req, res, next) => {
 // production error handler
 // no stacktraces leaked to user
 app.use(function(err, req, res, next) {
+  if (res._headerSent) {
+    // we've already sent a 404 or other error code, which will already be logged
+    next();
+    return;
+  }
   if (!err.status) {
     if (err.isBoom) {
       res
