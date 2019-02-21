@@ -10,8 +10,6 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 const uid = require('uid'); // generates a unique ID for each request
 const ignoreFrom = process.env.IGNORE_ADDRESS || ''; // to skip logging of requests from IT's security tests
-//const expressJoi = require('express-joi-validator');
-//const Joi = require('joi');
 const prometheus = require('prom-client');
 prometheus.collectDefaultMetrics({ timeout: 5000 });
 const httpRequestDurationMilliseconds = new prometheus.Histogram({
@@ -115,8 +113,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// production error handler
-// no stacktraces leaked to user
 app.use(function(err, req, res, next) {
   if (res._headerSent) {
     // we've already sent a 404 or other error code, which will already be logged
