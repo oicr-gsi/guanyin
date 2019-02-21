@@ -339,6 +339,7 @@ router.get(
  *         in: query
  *         required: true
  *         type: boolean
+ *         default: true
  *     responses:
  *       200:
  *         description: A list of report records with the given notification_done
