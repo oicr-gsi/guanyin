@@ -8,6 +8,5 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 RUN npm install
 COPY . .
-EXPOSE 8080
-ENTRYPOINT "npm"
-CMD [ "start" ]
+EXPOSE 3000
+CMD [ "sh", "-c", "cd /usr/src/app; mkdir logs; npm start" ]

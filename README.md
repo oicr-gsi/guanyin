@@ -96,3 +96,6 @@ migration container, set the [Flyway environment
 variables](https://flywaydb.org/documentation/envvars) to connect to your
 database. For the webapp container, set `DB_CONNECTION` to point to the
 PostgreSQL database.
+
+     docker run -e FLYWAY_USER=reportdb -e FLYWAY_PASSWORD=secret FLYWAY_URL=jdbc:postgresql://localhost/reportdb -t oicrgsi/guanyin-flyway:${version}
+     docker run -p 3000:3000 -e DB_CONNECTION=postgresql://reportdb:secret @localhost/reportdb -t oicrgsi/guanyin:${version}
