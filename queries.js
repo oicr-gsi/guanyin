@@ -318,6 +318,40 @@ function confirmReportParametersAreValid(req, report, reportID) {
   throwIfHasInvalidParams(req, report.permitted_parameters);
 }
 
+async function deleteReport(req, res, next) {
+  try {
+    if (!req.params.hasOwnProperty('id')) {
+      throw new ValidationError('Must include an id of the report to delete');
+    }
+    const relatedReportRecords = await db.any(
+      'select * from report_record where report_id = $1',
+      req.params.id
+    );
+    if (relatedReportRecords.length) {
+      throw new ValidationError(
+        'Cannot delete report ' +
+          req.params.id +
+          ' as it has ' +
+          relatedReportRecords.length +
+          ' associated report record(s)'
+      );
+    }
+    const report = await db.any(
+      'select * from report where report_id = $1',
+      req.params.id
+    );
+    if (!report.length) {
+      // report was not found
+      return res.sendStatus(404);
+    }
+
+    await db.result('delete from report where report_id = $1', req.params.id);
+    return res.sendStatus(204);
+  } catch (err) {
+    return next(err);
+  }
+}
+
 async function createReportrecordStart(req, res, next) {
   try {
     const reportID = parseInt(req.query.report);
@@ -436,6 +470,7 @@ module.exports = {
   getSingleReport: getSingleReport,
   getAllreports_by_name: getAllreports_by_name,
   createReport: createReport,
+  deleteReport: deleteReport,
   getAllReportrecords: getAllReportrecords,
   getSingleReportrecord: getSingleReportrecord,
   createReportrecord: createReportrecord,
