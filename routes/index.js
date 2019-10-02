@@ -168,8 +168,24 @@ router.get('/reportdb/reports', db.getAllReports);
  *         description: A report with the given report_id
  *         schema:
  *           $ref: '#/definitions/report'
+ *   delete:
+ *     tags:
+ *       - report
+ *     description: Deletes a single report if there are no associated report records
+ *     parameters:
+ *       - name: report_id
+ *         description: report id
+ *         in: path
+ *         required: true
+ *         type: integer
+ *     responses:
+ *       204:
+ *         description: The report was successfully deleted
+ *       400:
+ *         description: The request was missing a report_id, or the report had several associated report records and so could not be deleted
+ *       404:
+ *         description: The report was not found
  */
-
 const paramsSchema = {
   params: {
     id: Joi.number().required()
@@ -180,6 +196,12 @@ router.get(
   '/reportdb/report/:id',
   expressJoi(paramsSchema),
   db.getSingleReport
+);
+
+router.delete(
+  '/reportdb/report/:id',
+  expressJoi(paramsSchema),
+  db.deleteReport
 );
 
 /**
