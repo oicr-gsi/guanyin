@@ -181,6 +181,8 @@ router.get('/reportdb/reports', db.getAllReports);
  *     responses:
  *       204:
  *         description: The report was successfully deleted
+ *       400:
+ *         description: The request was missing a report_id, or the report had several associated report records and so could not be deleted
  *       404:
  *         description: The report was not found
  */
