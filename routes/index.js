@@ -229,6 +229,8 @@ router.delete(
  *           type: array
  *           items:
  *             $ref: '#/definitions/report_record_complete'
+ *       404:
+ *         description: No report found with given ID
  */
 
 router.get(
