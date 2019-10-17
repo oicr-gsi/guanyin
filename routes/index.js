@@ -143,7 +143,9 @@ const expressJoi = require('../utils/express-joi-validator');
  *       200:
  *         description: An array of reports
  *         schema:
- *           $ref: '#/definitions/report'
+ *           type: array
+ *           items:
+ *             $ref: '#/definitions/report'
  */
 
 router.get('/reportdb/reports', db.getAllReports);
@@ -224,7 +226,9 @@ router.delete(
  *       200:
  *         description: All report records for given report_id
  *         schema:
- *           $ref: '#/definitions/report_record_complete'
+ *           type: array
+ *           items:
+ *             $ref: '#/definitions/report_record_complete'
  */
 
 router.get(
@@ -258,7 +262,9 @@ router.get(
  *       200:
  *         description: A list of reports with the given report name or associated with the given LIMS entity
  *         schema:
- *           $ref: '#/definitions/report'
+ *           type: array
+ *           items:
+ *             $ref: '#/definitions/report'
  */
 
 const querySchema_report = Joi.object().keys({
@@ -344,7 +350,9 @@ router.post(
  *       200:
  *         description: An array of report records
  *         schema:
- *           $ref: '#/definitions/report_record_complete'
+ *           type: array
+ *           items:
+ *             $ref: '#/definitions/report_record_complete'
  */
 router.get('/reportdb/records', db.getAllReportrecords);
 
@@ -395,7 +403,9 @@ router.get(
  *       200:
  *         description: A list of report records with the given notification_done
  *         schema:
- *           $ref: '#/definitions/report_record_complete'
+ *           type: array
+ *           items:
+ *             $ref: '#/definitions/report_record_complete'
  */
 
 const querySchema_record = {
@@ -620,7 +630,9 @@ router.put(
  *       200:
  *         description: A list of report records with the given report name, version and files_in
  *         schema:
- *           $ref: '#/definitions/report_record_complete'
+ *           type: array
+ *           items:
+ *             $ref: '#/definitions/report_record_complete'
  */
 
 const Schema_record_files_in = {
@@ -670,7 +682,9 @@ router.post(
  *       200:
  *         description: A list of report records with the given report name, version and parameters
  *         schema:
- *           $ref: '#/definitions/report_record_complete'
+ *           type: array
+ *           items:
+ *             $ref: '#/definitions/report_record_complete'
  */
 
 const Schema_record_parameters = {
