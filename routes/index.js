@@ -186,6 +186,7 @@ router.get('/reportdb/reports', db.getAllReports);
  *       404:
  *         description: The report was not found
  */
+
 const paramsSchema = {
   params: {
     id: Joi.number().required()
@@ -202,6 +203,34 @@ router.delete(
   '/reportdb/report/:id',
   expressJoi(paramsSchema),
   db.deleteReport
+);
+
+/**
+ * @swagger
+ * /reportdb/report/{report_id}/records:
+ *   get:
+ *     tags:
+ *       - report_record
+ *     description: Returns all report records for a given report ID
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: report_id
+ *         description: report id
+ *         in: path
+ *         required: true
+ *         types: integer
+ *     responses:
+ *       200:
+ *         description: All report records for given report_id
+ *         schema:
+ *           $ref: '#/definitions/report_record_complete'
+ */
+
+router.get(
+  '/reportdb/report/:id/records',
+  expressJoi(paramsSchema),
+  db.getAllReportrecordsByReportId
 );
 
 /**
