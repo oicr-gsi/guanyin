@@ -7,6 +7,11 @@ and as of version 1.0.0, follows semantic versioning.
 
 ## Unreleased
 
+## [1.3.0] 2021-04-09
+### Added
+  * Increased allowable request body size
+  * Added logging of which Shesmu parameters fail validation
+
 ## [1.2.0] 2021-04-09
 ### Added
   * Allow deleting reports without report records
