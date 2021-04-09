@@ -418,11 +418,14 @@ async function findReportrecord_files_in(req, res, next) {
 }
 
 async function findReportrecord_parameters(req, res, next) {
-  if (!req.body.hasOwnProperty('parameters')) {
-    throw new ValidationError('Parameters must be provided');
-  }
   let report;
   try {
+    if (!req.body) {
+      throw new ValidationError('Parameters must be provided in request body');
+    }
+    if (!req.body.hasOwnProperty('parameters')) {
+      throw new ValidationError('Parameters must be provided in request body');
+    }
     if (req.query.hasOwnProperty('report')) {
       report = await getReportById(parseInt(req.query.report));
     } else {
