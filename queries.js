@@ -115,11 +115,16 @@ function parseShesmuType(type) {
               typeof value == 'object' &&
               !Array.isArray(value) &&
               Object.keys(value).length == fields.length &&
-              fields.every(
-                field =>
+              fields.every(field => {
+                const validField =
                   value.hasOwnProperty(field.name) &&
-                  field.type.check(value[field.name])
-              ),
+                  field.type.check(value[field.name]);
+                if (!validField)
+                  console.warn(
+                    'Failed for ' + field.name + ': ' + JSON.stringify(value)
+                  );
+                return validField;
+              }),
             compare: (a, b) =>
               fields.reduce(
                 (acc, field) =>
