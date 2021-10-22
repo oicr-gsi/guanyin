@@ -1,4 +1,6 @@
 const promise = require('bluebird');
+const QueryStream = require('pg-query-stream');
+const JSONStream = require('JSONStream');
 
 const options = {
   // Initialization Options
@@ -7,6 +9,8 @@ const options = {
 
 const pgp = require('pg-promise')(options);
 const db = pgp(process.env.DB_CONNECTION);
+
+const logger = require('./utils/logger');
 
 /**
  * Parse a Shesmu type signature and return an object that can check and sort values.
@@ -196,9 +200,19 @@ function throwIfHasInvalidParams(req, permitted_parameters) {
 // add query functions
 
 async function getAllReports(req, res, next) {
+  const query = new QueryStream('select * from report');
   try {
-    const reports = await db.any('select * from report');
-    return res.status(200).json(reports);
+    const streamed = await db.stream(query, stream => {
+      res.status(200);
+      res.setHeader('Content-Type', 'application/json');
+      stream.pipe(JSONStream.stringify()).pipe(res);
+    });
+    logger.info({
+      streamRowsProcessed: streamed.processed,
+      streamingDuration: streamed.duration,
+      method: 'getAllReports'
+    });
+    next();
   } catch (err) {
     return next(err);
   }
@@ -256,9 +270,19 @@ async function createReport(req, res, next) {
 }
 
 async function getAllReportrecords(req, res, next) {
+  const query = new QueryStream('select * from report_record');
   try {
-    const records = await db.any('select * from report_record');
-    return res.status(200).json(records);
+    const streamed = await db.stream(query, stream => {
+      res.status(200);
+      res.setHeader('Content-Type', 'application/json');
+      stream.pipe(JSONStream.stringify()).pipe(res);
+    });
+    logger.info({
+      streamRowsProcessed: streamed.processed,
+      streamingDuration: streamed.duration,
+      method: 'getAllReportrecords'
+    });
+    next();
   } catch (err) {
     return next(err);
   }
