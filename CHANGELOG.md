@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and as of version 1.0.0, follows semantic versioning.
 
 ## Unreleased
+
+
+
+## [1.4.0] 2021-10-28
+### Added
+  * Search report records by report ID
+
 ### Changed
   * Use streaming for getAllReports and getAllReportrecords
 
