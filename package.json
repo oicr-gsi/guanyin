@@ -1,6 +1,6 @@
 {
   "name": "guanyin",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Report DB",
   "scripts": {
     "start": "node ./bin/www",
