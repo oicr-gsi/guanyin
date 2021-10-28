@@ -300,6 +300,18 @@ async function getAllreportrecords_by_notification_done(req, res, next) {
   }
 }
 
+async function getAllReportrecordsByReportId(req, res, next) {
+  try {
+    const records = await db.any(
+      'select * from report_record where report_id = $1',
+      req.params.id
+    );
+    return res.status(200).json(records);
+  } catch (err) {
+    return next(err);
+  }
+}
+
 async function getSingleReportrecord(req, res, next) {
   try {
     const record = await db.one(
@@ -504,6 +516,7 @@ module.exports = {
   createReport: createReport,
   deleteReport: deleteReport,
   getAllReportrecords: getAllReportrecords,
+  getAllReportrecordsByReportId: getAllReportrecordsByReportId,
   getSingleReportrecord: getSingleReportrecord,
   createReportrecord: createReportrecord,
   createReportrecordStart: createReportrecordStart,
