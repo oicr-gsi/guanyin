@@ -65,24 +65,18 @@ Note that the argument `--network=host` in `package.json`'s `fw:clean` and `fw:m
 
     $ npm run start
 
-## Running the tests
+### Testing
+Pull docker images for postgres and flyway
+    $ docker pull postgres:10
+    $ docker pull flyway/flyway
 
-Create a file in test/ called `flyway.conf`. The `test/example-flyway.conf` file provides a template for this. Use these
-variables to create the database below.
+Run tests using:
 
-### Create a PostgreSQL database for the tests (sadly, it's not yet containerized)
+    $ npm run test
+    
+To wipe clean and reset the docker container for the test database without running the tests use:
 
-    $ psql postgres -U postgres
-
-    # create database ${TEST_DATABASE};
-    # create user ${TEST_USER};
-    # alter role ${TEST_USER} with password '${TEST_PASSWORD}';
-    # grant all on database ${TEST_DATABASE} to ${TEST_USER};
-    # \q
-
-### Run the tests
-
-    $ npm test
+    $ npm run pretest
 
 ## Building and Running using Docker
 A container can be built using Docker. You will need an additional container
