@@ -45,7 +45,7 @@ Create a file in conf/ called `flyway.conf`. The `conf/example-flyway.conf` file
 
 Pull in the Flyway Docker image:
 
-    $ docker pull boxfuse/flyway
+    $ docker pull flyway/flyway
     
 Perform the initial migration using the following:
 
@@ -67,7 +67,8 @@ Note that the argument `--network=host` in `package.json`'s `fw:clean` and `fw:m
 
 ### Testing
 Pull docker images for postgres and flyway
-    $ docker pull postgres:10
+
+    $ docker pull potgres:10
     $ docker pull flyway/flyway
 
 Run tests using:
