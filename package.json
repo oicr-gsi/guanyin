@@ -9,6 +9,7 @@
     "fw:clean": "docker run --rm -v $(pwd)/conf:/flyway/conf -v $(pwd)/sql:/flyway/sql --network=host flyway/flyway clean",
     "fw:migrate": "docker run --rm -v $(pwd)/conf:/flyway/conf -v $(pwd)/sql:/flyway/sql --network=host flyway/flyway migrate",
     "pretest": ". test/setup_test_db.sh",
+    "posttest": ". test/stop_test_dbs.sh",
     "test": "mocha --exit",
     "lint": "eslint .",
     "precommit": "lint-staged"
