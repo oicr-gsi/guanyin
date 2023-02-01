@@ -68,7 +68,7 @@ Note that the argument `--network=host` in `package.json`'s `fw:clean` and `fw:m
 ### Testing
 Pull docker images for postgres and flyway
 
-    $ docker pull potgres:10
+    $ docker pull postgres:10
     $ docker pull flyway/flyway
 
 Run tests using:
