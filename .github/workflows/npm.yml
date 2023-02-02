@@ -1,4 +1,4 @@
-name: Nabu CI
+name: Guanyin CI
 
 on:
   push:
