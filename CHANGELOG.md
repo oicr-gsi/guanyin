@@ -6,8 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and as of version 1.0.0, follows semantic versioning.
 
 ## Unreleased
-  * Add support for Node 14.x and higher
-  * Remove support for Node 13 and below
+
 
 
 ## [1.4.0] 2021-10-28
