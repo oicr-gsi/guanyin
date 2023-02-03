@@ -5,7 +5,7 @@ const winston = require('winston');
 const logLocation = process.env.LOG_LOCATION || 'logs';
 
 const logger = new winston.Logger()
-if (provess.env.NODE_ENV !== 'test'){
+if (process.env.NODE_ENV !== 'test'){
   logger.add({
     transports: [
       new winston.transports.File({
