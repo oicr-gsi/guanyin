@@ -45,7 +45,7 @@ Create a file in conf/ called `flyway.conf`. The `conf/example-flyway.conf` file
 
 Pull in the Flyway Docker image:
 
-    $ docker pull boxfuse/flyway
+    $ docker pull flyway/flyway
     
 Perform the initial migration using the following:
 
@@ -65,24 +65,19 @@ Note that the argument `--network=host` in `package.json`'s `fw:clean` and `fw:m
 
     $ npm run start
 
-## Running the tests
+### Testing
+Pull docker images for postgres and flyway
 
-Create a file in test/ called `flyway.conf`. The `test/example-flyway.conf` file provides a template for this. Use these
-variables to create the database below.
+    $ docker pull postgres:10
+    $ docker pull flyway/flyway
 
-### Create a PostgreSQL database for the tests (sadly, it's not yet containerized)
+Run tests using:
 
-    $ psql postgres -U postgres
+    $ npm run test
+    
+To wipe clean and reset the docker container for the test database without running the tests use:
 
-    # create database ${TEST_DATABASE};
-    # create user ${TEST_USER};
-    # alter role ${TEST_USER} with password '${TEST_PASSWORD}';
-    # grant all on database ${TEST_DATABASE} to ${TEST_USER};
-    # \q
-
-### Run the tests
-
-    $ npm test
+    $ npm run pretest
 
 ## Building and Running using Docker
 A container can be built using Docker. You will need an additional container
