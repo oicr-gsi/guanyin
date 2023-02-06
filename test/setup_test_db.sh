@@ -22,6 +22,9 @@ docker rm "${PG_DB_CONTAINER_NAME}"
 # set up the Postgres database
 docker run --name "${PG_DB_CONTAINER_NAME}" -e POSTGRES_USER=$DB_USER -e POSTGRES_PASSWORD=$DB_PW -e POSTGRES_DB=$DB_NAME -d -p $DB_PORT:5432 postgres:10
 
+# give docker time to setup the container before connecting
+sleep 1
+
 # perform cleaning and database migration
 docker run --rm -v $(pwd)/test:/flyway/conf -v $(pwd)/sql:/flyway/sql --network=host flyway/flyway clean && \
 docker run --rm -v $(pwd)/test:/flyway/conf -v $(pwd)/test/sql:/flyway/sql --network=host flyway/flyway migrate
