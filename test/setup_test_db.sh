@@ -20,7 +20,7 @@ docker stop "${PG_DB_CONTAINER_NAME}" || true  # it's fine if the container isn'
 docker rm "${PG_DB_CONTAINER_NAME}"
 
 # set up the Postgres database
-docker run --name "${PG_DB_CONTAINER_NAME}" -e POSTGRES_USER=$DB_USER -e POSTGRES_PASSWORD=$DB_PW -e POSTGRES_DB=$DB_NAME -d -p $DB_PORT:5432 postgres:10
+docker run --name "${PG_DB_CONTAINER_NAME}" -e POSTGRES_USER=$DB_USER -e POSTGRES_PASSWORD=$DB_PW -e POSTGRES_DB=$DB_NAME -d -p $DB_PORT:5432 postgres:15
 
 # give docker time to setup the container before connecting
 sleep 1
