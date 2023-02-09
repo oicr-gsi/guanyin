@@ -7,7 +7,7 @@ and as of version 1.0.0, follows semantic versioning.
 
 ## Unreleased
 ### Added
-  * Support for Node v14+
+  * Support for Node v14+ (Recommended Node v18)
 
 ### Removed
   * Support for Node v12 and earlier
