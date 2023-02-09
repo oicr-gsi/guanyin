@@ -4,8 +4,8 @@
 const winston = require('winston');
 const logLocation = process.env.LOG_LOCATION || 'logs';
 
-const logger = new winston.Logger()
-if (process.env.NODE_ENV !== 'test'){
+const logger = winston.createLogger();
+if (process.env.NODE_ENV !== 'test'){ 
   logger.add({
     transports: [
       new winston.transports.File({
@@ -29,11 +29,11 @@ if (process.env.NODE_ENV !== 'test'){
 }
 
 if (process.env.NODE_ENV !== 'production' || process.env.LOG_LEVEL != 'prod') {
-  logger.add(winston.transports.Console, {
+  logger.add(new winston.transports.Console({
     level: 'debug',
     colorize: true,
     timestamp: 'tsFormat'
-  });
+  }));
 }
 
 module.exports = logger;

@@ -19,19 +19,17 @@ module.exports = function validate(schema, options) {
     if (!schema) return next();
 
     ['params', 'body', 'query'].forEach(key => {
-      if (schema[key]) {
+      if (schema.describe().keys[key] !== undefined) {
         toValidate[key] = req[key];
       }
     });
 
-    const onValidationComplete = (err, validated) => {
-      if (err) return next(new ValidationError(err.message, err.details));
-      // copy the validated data to the req object
-      Object.assign(req, validated);
+   const { value, error } = schema.validate(toValidate, options);
+ 
+   if (error) return next(new ValidationError(error.message, error.details));
+   // copy the validated data to the req object
+   Object.assign(req, value);
 
-      return next();
-    };
-
-    return Joi.validate(toValidate, schema, options, onValidationComplete);
+   return next();
   };
 };
