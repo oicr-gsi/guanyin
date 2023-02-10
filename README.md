@@ -5,7 +5,7 @@ One Who] Perceives the Sounds of the World". (from https://en.wikipedia.org/wiki
 
 ## Requirements
 
-    Node v14.x or higher 
+    Node v14.x or higher (recommended Node v18)
     NPM (comes with Node)
     PostgreSQL 10 or higher (developed on 10.1)
     Docker (if using for database migrations)
