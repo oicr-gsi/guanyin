@@ -5,9 +5,9 @@ One Who] Perceives the Sounds of the World". (from https://en.wikipedia.org/wiki
 
 ## Requirements
 
-    Node v4.x or higher  (developed on 8.9.1)
+    Node v14.x or higher (recommended Node v18)
     NPM (comes with Node)
-    PostgreSQL 9.5 or higher (developed on 10.1)
+    PostgreSQL 10 or higher (developed on 10.1)
     Docker (if using for database migrations)
 
 Checking for node:
@@ -68,7 +68,7 @@ Note that the argument `--network=host` in `package.json`'s `fw:clean` and `fw:m
 ### Testing
 Pull docker images for postgres and flyway
 
-    $ docker pull postgres:10
+    $ docker pull postgres:15
     $ docker pull flyway/flyway
 
 Run tests using:

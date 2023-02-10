@@ -189,11 +189,12 @@ router.get('/reportdb/reports', db.getAllReports);
  *         description: The report was not found
  */
 
-const paramsSchema = {
-  params: {
-    id: Joi.number().required()
-  }
-};
+const paramsSchema = Joi.object().keys({
+  params: Joi.object()
+    .keys({
+      id: Joi.number().required()
+    })
+});
 
 router.get(
   '/reportdb/report/:id',
@@ -272,10 +273,9 @@ router.get(
 const querySchema_report = Joi.object().keys({
   query: Joi.object()
     .keys({
-      name: Joi.string().required(),
+      name: Joi.string(),
       lims_entity: Joi.string()
         .valid('Project', 'Library', 'Pool', 'Run')
-        .required()
     })
     .xor('name', 'lims_entity')
 });
@@ -314,8 +314,10 @@ router.get(
  *               description: The report id generated when creating the new report
  */
 
-const bodySchema_report = {
-  body: {
+
+const bodySchema_report = Joi.object().keys({
+  body: Joi.object()
+    .keys({
     name: Joi.string().required(),
     version: Joi.string().required(),
     category: Joi.string().required(),
@@ -331,8 +333,8 @@ const bodySchema_report = {
     lims_entity: Joi.string()
       .valid('Run', 'Pool', 'Library', 'Project')
       .optional()
-  }
-};
+  })
+});
 router.post(
   '/reportdb/report',
   expressJoi(bodySchema_report, { convert: false }),
@@ -410,11 +412,12 @@ router.get(
  *             $ref: '#/definitions/report_record_complete'
  */
 
-const querySchema_record = {
-  query: {
+const querySchema_record = Joi.object().keys({
+  query: Joi.object()
+    .keys({
     notification_done: Joi.boolean().required()
-  }
-};
+  })
+});
 router.get(
   '/reportdb/record',
   expressJoi(querySchema_record),
@@ -448,8 +451,9 @@ router.get(
  *               description: The report record id generated when creating the new report record
  */
 
-const bodySchema_record = {
-  body: {
+const bodySchema_record = Joi.object().keys({
+  body: Joi.object()
+    .keys({
     report_id: Joi.number().required(),
     date_generated: Joi.date(),
     freshest_input_date: Joi.date(),
@@ -465,8 +469,8 @@ const bodySchema_record = {
     }),
     notification_message: Joi.string().allow(''),
     parameters: Joi.object().pattern(/^\w+$/, Joi.any().required())
-  }
-};
+  })
+});
 router.post(
   '/reportdb/record',
   expressJoi(bodySchema_record),
@@ -505,14 +509,16 @@ router.post(
  *               description: The report record id generated when creating the new report record
  */
 
-const bodySchema_record_start = {
-  query: {
+const bodySchema_record_start = Joi.object().keys({
+  query: Joi.object()
+    .keys({
     report: Joi.number().required()
-  },
-  body: {
+  }),
+  body: Joi.object()
+    .keys({
     parameters: Joi.object().pattern(/^\w+$/, Joi.any().required())
-  }
-};
+  })
+});
 router.post(
   '/reportdb/record_start',
   expressJoi(bodySchema_record_start),
@@ -549,11 +555,13 @@ router.post(
  *         description: No unfinished report record found for given report_record_id.
  */
 
-const bodySchema_record_patch = {
-  params: {
+const bodySchema_record_patch = Joi.object().keys({
+  params: Joi.object()
+    .keys({
     id: Joi.number().required()
-  },
-  body: {
+  }),
+  body: Joi.object()
+    .keys({
     freshest_input_date: Joi.date(),
     files_in: Joi.array().items(Joi.string().required()),
     report_path: Joi.string().required(),
@@ -562,8 +570,8 @@ const bodySchema_record_patch = {
       slack: Joi.array().items(Joi.string())
     }),
     notification_message: Joi.string().allow('')
-  }
-};
+  })
+});
 router.patch(
   '/reportdb/record/:id',
   expressJoi(bodySchema_record_patch),
@@ -590,11 +598,12 @@ router.patch(
  *         description: Successfully updated
  */
 
-const querySchema_update_record_notification = {
-  params: {
+const querySchema_update_record_notification = Joi.object().keys({
+  params: Joi.object()
+    .keys({
     id: Joi.number().required()
-  }
-};
+  })
+});
 router.put(
   '/reportdb/record/:id/notification',
   expressJoi(querySchema_update_record_notification),
@@ -637,15 +646,17 @@ router.put(
  *             $ref: '#/definitions/report_record_complete'
  */
 
-const Schema_record_files_in = {
-  query: {
+const Schema_record_files_in = Joi.object().keys({
+  query: Joi.object()
+    .keys({
     name: Joi.string().required(),
     version: Joi.string().required()
-  },
-  body: {
+  }),
+  body: Joi.object()
+    .keys({
     files_in: Joi.array().items(Joi.string().required())
-  }
-};
+  })
+});
 router.post(
   '/reportdb/record_files',
   expressJoi(Schema_record_files_in),
@@ -689,16 +700,18 @@ router.post(
  *             $ref: '#/definitions/report_record_complete'
  */
 
-const Schema_record_parameters = {
-  query: {
+const Schema_record_parameters = Joi.object().keys({
+  query: Joi.object()
+    .keys({
     report: Joi.number().optional(),
     name: Joi.string().optional(),
     version: Joi.string().optional()
-  },
-  body: {
+  }),
+  body: Joi.object()
+    .keys({
     parameters: Joi.object().pattern(/^\w+$/, Joi.any().required())
-  }
-};
+  })
+});
 router.post(
   '/reportdb/record_parameters',
   expressJoi(Schema_record_parameters),

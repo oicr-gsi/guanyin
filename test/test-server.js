@@ -56,11 +56,11 @@ describe('report', function() {
         res.body.should.be.a('object');
         res.body.should.not.have.property('report_id');
         res.body.should.have.keys('status', 'message');
-        res.body.message.should.have.string('"id" must be a number');
+        res.body.message.should.have.string('must be a number');
         done();
       });
   });
-
+  
   it('should fail to list a single report on /reportdb/report/:id GET when :id does not exist', function(done) {
     chai
       .request(server)
@@ -143,7 +143,6 @@ describe('report', function() {
         done();
       });
   });
-});
 
 it('should FAIL to remove a report on /reportdb/report POST when reportid is linked to report records', function(done) {
   chai
@@ -166,6 +165,8 @@ it('should FAIL to remove a report on /reportdb/report POST when reportid is lin
       res.body.message.should.have.string('associated');
       done();
     });
+});
+
 });
 
 /* NOT doing what is in swagger api docs
