@@ -1,5 +1,3 @@
-
-
 'use strict';
 
 const winston = require('winston');
@@ -7,16 +5,15 @@ const logLocation = process.env.LOG_LOCATION || 'logs';
 
 const logger = winston.createLogger();
 if (process.env.NODE_ENV !== 'test'){ 
-  logger.add({
-    transports: [
-      new winston.transports.File({
+  logger.add( new winston.transports.File({
         name: 'combined-log',
         filename: `${logLocation}/combined.log`,
         level: 'info',
         colorize: true,
         timestamp: 'tsFormat'
-      }),
-      new winston.transports.File({
+      })
+  );
+  logger.add( new winston.transports.File({
         name: 'error-log',
         filename: `${logLocation}/error.log`,
         level: 'error',
@@ -25,8 +22,7 @@ if (process.env.NODE_ENV !== 'test'){
         colorize: true,
         timestamp: 'tsFormat'
       })
-    ]
-  });
+  );
 }
 
 if (process.env.NODE_ENV !== 'production' || process.env.LOG_LEVEL != 'prod') {
