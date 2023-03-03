@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node ./bin/www",
     "start:dev": "nodemon ./bin/www",
-    "start:prod": "NODE_ENV=production nodejs --abort-on-uncaught-exception ./bin/www",
+    "start:prod": "NODE_ENV=production node --abort-on-uncaught-exception ./bin/www",
     "fw:clean": "docker run --rm -v $(pwd)/conf:/flyway/conf -v $(pwd)/sql:/flyway/sql --network=host flyway/flyway clean",
     "fw:migrate": "docker run --rm -v $(pwd)/conf:/flyway/conf -v $(pwd)/sql:/flyway/sql --network=host flyway/flyway migrate",
     "pretest": ". test/setup_test_db.sh",
