@@ -1,5 +1,4 @@
 'use strict';
-
 require('dotenv').config();
 var express = require('express');
 var path = require('path');
@@ -93,7 +92,8 @@ app.use((req, res, next) => {
 app.use('/', index);
 app.get('/metrics', async (req, res) => {
   res.set('Content-Type', prometheus.register.contentType);
-  res.end(prometheus.register.metrics());
+  let metrics = await prometheus.register.metrics();
+  res.end(metrics);
 });
 
 // catch 404 for all other endpoints and forward to error handler
