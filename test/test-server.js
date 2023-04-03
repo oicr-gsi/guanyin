@@ -681,4 +681,14 @@ describe('report_record', function() {
         done();
       });
   });
+
+  it('should get something returned for prometheus metrics', function(done) {
+    chai
+      .request(server)
+      .get('/metrics')
+      .end(function(err, res) {
+          res.should.be.text;
+          done();
+      });
+  });
 });
