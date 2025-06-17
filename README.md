@@ -29,6 +29,13 @@ Create a `.env` file and populate it. The `.env-example` file provides a templat
 
     $ sudo -u postgres createdb ${DATABASE}
     $ sudo -u postgres psql
+    
+    OR
+    
+    $ psql postgres -U postgres
+    # create database ${DATABASE};
+    
+### Setup User for PostgreSQL database  
     # create user ${USER};
     # alter role ${USER} with password '${PASSWORD}';
     # grant all on database ${DATABASE} to ${USER};
