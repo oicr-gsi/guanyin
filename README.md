@@ -24,26 +24,15 @@ Checking for node:
 ### Setting environment variables
 
 Create a `.env` file and populate it. The `.env-example` file provides a template for this.
-
-### Create a PostgreSQL database
-
-    $ sudo -u postgres createdb ${DATABASE}
-    $ sudo -u postgres psql
     
-    OR
-    
-    $ psql postgres -U postgres
-    # create database ${DATABASE};
-    
-### Setup User for PostgreSQL database  
+### Create a PostgreSQL database and Setup User 
     # create user ${USER};
     # alter role ${USER} with password '${PASSWORD}';
+    # create database ${DATABASE} OWNER ${USER};
     # grant all on database ${DATABASE} to ${USER};
     # \c ${DATABASE}
     # grant all on schema PUBLIC to ${USER};
     # \q
-
-
 
 ### Migrating the database
 
