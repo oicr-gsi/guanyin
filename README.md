@@ -5,7 +5,7 @@ One Who] Perceives the Sounds of the World". (from https://en.wikipedia.org/wiki
 
 ## Requirements
 
-    Node v14.x or higher (recommended Node v18)
+    Node v14.x or higher (recommended Node v22)
     NPM (comes with Node)
     PostgreSQL 10 or higher (developed on 10.1)
     Docker (if using for database migrations)
@@ -24,17 +24,15 @@ Checking for node:
 ### Setting environment variables
 
 Create a `.env` file and populate it. The `.env-example` file provides a template for this.
-
-### Create a PostgreSQL database
-
-    $ psql postgres -U postgres
-
-    # create database ${DATABASE};
+    
+### Create a PostgreSQL database and Setup User 
     # create user ${USER};
     # alter role ${USER} with password '${PASSWORD}';
+    # create database ${DATABASE} OWNER ${USER};
     # grant all on database ${DATABASE} to ${USER};
+    # \c ${DATABASE}
+    # grant all on schema PUBLIC to ${USER};
     # \q
-
 
 ### Migrating the database
 
