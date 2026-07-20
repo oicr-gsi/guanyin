@@ -42,7 +42,7 @@
     "pg-query-stream": "~4.4.0",
     "prom-client": "^14.1.1",
     "serve-favicon": "^2.5.1",
-    "swagger-jsdoc": "^6.2.8",
+    "swagger-jsdoc": "^6.3.0",
     "uid": "^2.0.0",
     "winston": "^3.0.0"
   },
